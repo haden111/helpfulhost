@@ -31,3 +31,4 @@ export const supportedLanguages: Language[] = [
   { code: 'it', name: 'Italiano (Italian)', emoji: '🇮🇹' },
   { code: 'fa', name: 'فارسی (Persian)', emoji: '🇮🇷' },
 ];
+
