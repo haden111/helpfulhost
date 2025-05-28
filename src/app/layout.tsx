@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { Header } from '@/components/custom/Header';
+import { FooterContent } from '@/components/custom/FooterContent'; // Changed import
 import { Toaster } from "@/components/ui/toaster";
 import { headers } from 'next/headers';
 import { autoDetectLanguage, type AutoDetectLanguageInput } from '@/ai/flows/auto-detect-language';
@@ -77,8 +78,7 @@ export default async function RootLayout({
               {children}
             </main>
             <footer className="py-6 text-center text-sm text-muted-foreground border-t">
-              <p>© {new Date().getFullYear()} Haden's Airbnb. All rights reserved.</p>
-              <p className="mt-2">If you have further questions, send a question to Haden via the Airbnb app.</p>
+              <FooterContent /> {/* Use the new component here */}
             </footer>
           </div>
           <Toaster />
