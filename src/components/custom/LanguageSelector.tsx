@@ -39,14 +39,14 @@ export function LanguageSelector() {
             <SelectItem key={lang.code} value={lang.code}>
               <div className="flex items-center gap-2">
                 {lang.flagCode === 'globe' ? (
-                  <GlobeIcon className="w-5 h-5 rounded-sm" />
+                  <GlobeIcon className="w-5 h-5 rounded-sm border border-black" />
                 ) : (
                   <Image
                     src={`https://flagcdn.com/w20/${lang.flagCode.toLowerCase()}.png`}
                     alt={`${lang.name} flag`}
                     width={20}
                     height={15}
-                    className="rounded-sm object-cover" // added object-cover
+                    className="rounded-sm object-cover border border-black"
                   />
                 )}
                 <span>{lang.name}</span>
