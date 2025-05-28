@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { LanguageSelector } from '@/components/custom/LanguageSelector';
 
 export function Header() {
   return (
@@ -15,7 +16,8 @@ export function Header() {
           </svg>
           Haden's Helpful Host
         </Link>
-        <nav>
+        <nav className="flex items-center gap-4">
+          <LanguageSelector />
           <Button variant="ghost" size="icon" asChild>
             <Link href="/" aria-label="Home">
               <Home className="h-5 w-5" />

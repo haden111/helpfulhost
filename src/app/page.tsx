@@ -1,4 +1,3 @@
-import { LanguageSelector } from '@/components/custom/LanguageSelector';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -20,13 +19,11 @@ export default function WelcomePage() {
           <CardTitle className="text-3xl font-bold text-primary">Welcome to Haden's Helpful Host!</CardTitle>
           <CardDescription className="text-foreground/80 mt-2 text-base">
             Your friendly guide to a comfortable and enjoyable stay.
-            Please select your preferred language below to get started.
+            You can change your preferred language using the selector in the top right corner.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-8 space-y-8">
-          <div className="flex justify-center">
-            <LanguageSelector />
-          </div>
+          {/* LanguageSelector removed from here */}
           
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-center text-foreground/90">Quick Access Instructions:</h3>
