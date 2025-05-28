@@ -103,7 +103,16 @@ const translateInstructionalTextFlow = ai.defineFlow(
       language: input.language,
     };
 
-    const {output: llmOutputJsonString} = await translateInstructionalTextPrompt(promptInput);
+    let llmOutputJsonString: string | null = null;
+    try {
+      const {output} = await translateInstructionalTextPrompt(promptInput);
+      llmOutputJsonString = output; // output is already potentially null due to LLMJsonStringOutputSchema
+    } catch (error) {
+      console.error("Error calling translateInstructionalTextPrompt:", error);
+      // Fallback to original texts if the AI call itself fails (e.g., 503, network issue)
+      return { translatedTexts: input.textsToTranslate };
+    }
+    
 
     if (llmOutputJsonString === null || typeof llmOutputJsonString !== 'string') {
         console.warn("LLM translation output is null or not a string. Falling back to original. LLM Output:", llmOutputJsonString, "Input:", input.textsToTranslate);
