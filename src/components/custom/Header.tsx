@@ -13,7 +13,7 @@ export function Header() {
           <Image
             src="/haden.png" 
             alt="Haden's Airbnb Logo"
-            width={40} 
+            width={80} 
             height={40} 
             className="h-10 w-auto" 
             priority

@@ -14,8 +14,8 @@ export default function WelcomePage() {
             <Image
               src="/haden.png"
               alt="Haden's Airbnb Logo"
-              width={100}
-              height={100}
+              width={160}
+              height={80}
               className="h-24 w-auto rounded-full"
               priority
             />
@@ -66,4 +66,3 @@ export default function WelcomePage() {
     </div>
   );
 }
-
