@@ -12,22 +12,21 @@ export default function WelcomePage() {
         <CardHeader className="text-center bg-primary/20 p-8">
           <div className="mx-auto mb-6 flex justify-center">
             <Image
-              src="/haden.png" 
+              src="/haden.png"
               alt="Haden's Airbnb Logo"
-              width={100} 
-              height={100} 
-              className="h-24 w-auto rounded-full" 
+              width={100}
+              height={100}
+              className="h-24 w-auto rounded-full"
               priority
             />
           </div>
           <CardTitle className="text-3xl font-bold text-primary">Welcome to Haden's Airbnb!</CardTitle>
           <CardDescription className="text-foreground/80 mt-2 text-base">
             Your friendly guide to a comfortable and enjoyable stay.
-            You can change your preferred language using the selector in the top right corner.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-8 space-y-8">
-          
+
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-center text-foreground/90">Quick Access Instructions:</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

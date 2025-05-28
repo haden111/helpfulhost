@@ -1,3 +1,4 @@
+
 export interface InstructionLocation {
   titleKey: string; // Key for fetching original title, e.g., "welcomeTitle"
   stepsKeys: string[]; // Keys for fetching original steps
@@ -11,42 +12,41 @@ export interface InstructionLocation {
 
 export const instructionsData: Record<string, InstructionLocation> = {
   "front-door": {
-    titleKey: "frontDoorWelcome",
-    stepsKeys: ["frontDoorStep1", "frontDoorStep2", "frontDoorStep3"],
+    titleKey: "frontDoorInstructions",
+    stepsKeys: ["frontDoorStep1", "frontDoorStep2"],
     defaultTexts: {
-      title: "Welcome to Our Home!",
+      title: "Front Door Instructions",
       steps: [
-        "Please use the keypad to enter the code: 1234#.",
-        "Turn the handle to the right to open.",
-        "Make yourself comfortable!",
+        "To unlock the door, enter the code: 1234#.",
+        "To lock the door, press the Schlage button once.",
       ],
     },
     image: "https://placehold.co/600x400.png",
     dataAiHint: "door entrance",
   },
   "living-room-tv": {
-    titleKey: "livingRoomTvGuide",
+    titleKey: "livingRoomTvInstructions",
     stepsKeys: ["livingRoomTvStep1", "livingRoomTvStep2", "livingRoomTvStep3"],
     defaultTexts: {
-      title: "TV Remote Guide",
+      title: "Living Room TV Instructions",
       steps: [
-        "Use the top-left button to turn the TV on/off.",
-        "The 'Source' button changes input (HDMI1, HDMI2, etc.).",
-        "Volume and channel controls are in the middle.",
+        "Use the top-left button on the main TV remote to turn the TV on/off.",
+        "The 'Source' button on the main TV remote changes input (HDMI1 for Apple TV, HDMI2 for Chromecast).",
+        "Volume controls are on the main TV remote. The Apple TV remote controls the Apple TV interface.",
       ],
     },
     image: "https://placehold.co/600x400.png",
     dataAiHint: "television remote",
   },
   "kitchen-coffee-machine": {
-    titleKey: "kitchenCoffeeMachine",
+    titleKey: "kitchenCoffeeMachineInstructions",
     stepsKeys: ["coffeeMachineStep1", "coffeeMachineStep2", "coffeeMachineStep3"],
     defaultTexts: {
-      title: "Coffee Machine Instructions",
+      title: "Kitchen Coffee Machine Instructions",
       steps: [
-        "Ensure the water tank is filled.",
-        "Place a coffee pod in the designated slot.",
-        "Select your desired coffee size and press start.",
+        "Ensure the water tank at the back is filled with fresh water.",
+        "Lift the handle, place a coffee pod in the slot, and firmly close the handle.",
+        "Select your desired coffee size (small or large cup icon) and press the button to brew.",
       ],
     },
     image: "https://placehold.co/600x400.png",
