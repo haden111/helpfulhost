@@ -46,10 +46,11 @@ export const LanguageProvider = ({
   const { toast } = useToast();
 
   const isLanguageSupported = useCallback((langCode: string): boolean => {
-    return supportedLanguages.some(l => l.code === langCode);
+    return supportedLanguages.some(l => l.code.toLowerCase() === langCode.toLowerCase());
   }, []);
 
-  const getDefaultLanguage = useCallback((): string => {
+  // Initialize state using a function for one-time computation
+  const [currentLanguage, setCurrentLanguageState] = useState<string>(() => {
     const langFromCookie = getCookie(COOKIE_NAME);
     if (langFromCookie && isLanguageSupported(langFromCookie)) {
       return langFromCookie;
@@ -62,31 +63,22 @@ export const LanguageProvider = ({
       }
     }
     
-    if (isLanguageSupported('en')) return 'en';
-    return supportedLanguages.length > 0 ? supportedLanguages[0].code : 'en'; // Fallback
-  }, [initialDetectedLanguage, isLanguageSupported]);
-
-  const [currentLanguage, setCurrentLanguageState] = useState<string>(getDefaultLanguage());
+    if (isLanguageSupported('en')) return 'en'; // Default to English
+    return supportedLanguages.length > 0 ? supportedLanguages[0].code : 'en'; // Absolute fallback
+  });
 
   useEffect(() => {
-    // Ensure currentLanguage is always valid on mount or if supportedLanguages changes
-    const defaultLang = getDefaultLanguage();
-    if(currentLanguage !== defaultLang && !getCookie(COOKIE_NAME)) { // Prioritize cookie if exists
-         setCurrentLanguageState(defaultLang);
-    }
-  }, [getDefaultLanguage, currentLanguage]);
-
-
-  useEffect(() => {
+    // This effect ensures the html lang attribute is updated whenever currentLanguage changes.
     if (typeof document !== 'undefined') {
       document.documentElement.lang = currentLanguage;
     }
   }, [currentLanguage]);
 
   const setLanguage = (langCode: string) => {
-    if (isLanguageSupported(langCode)) {
-      setCurrentLanguageState(langCode);
-      setCookie(COOKIE_NAME, langCode);
+    const normalizedLangCode = langCode.toLowerCase();
+    if (isLanguageSupported(normalizedLangCode)) {
+      setCurrentLanguageState(normalizedLangCode);
+      setCookie(COOKIE_NAME, normalizedLangCode);
     } else {
       toast({
         title: "Unsupported Language",
