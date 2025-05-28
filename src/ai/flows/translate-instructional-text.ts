@@ -104,13 +104,28 @@ const translateInstructionalTextFlow = ai.defineFlow(
     };
 
     let llmOutputJsonString: string | null = null;
-    try {
-      const {output} = await translateInstructionalTextPrompt(promptInput);
-      llmOutputJsonString = output; // output is already potentially null due to LLMJsonStringOutputSchema
-    } catch (error) {
-      console.error("Error calling translateInstructionalTextPrompt:", error);
-      // Fallback to original texts if the AI call itself fails (e.g., 503, network issue)
-      return { translatedTexts: input.textsToTranslate };
+    let retries = 0;
+    const maxRetries = 3; // Max 3 retries (4 attempts total)
+    const initialDelay = 1000; // 1 second
+
+    while (retries <= maxRetries) {
+      try {
+        const {output} = await translateInstructionalTextPrompt(promptInput);
+        llmOutputJsonString = output; // output is already potentially null due to LLMJsonStringOutputSchema
+        break; // Success, exit retry loop
+      } catch (error: any) {
+        retries++;
+        const errorMessage = error.message || 'Unknown error during translation attempt.';
+        console.warn(`Translate Flow: Attempt ${retries} failed. Error: ${errorMessage}`);
+        if (retries > maxRetries) {
+          console.error("Translate Flow: Max retries reached. Falling back to original texts after multiple failures.", error);
+          // Fallback to original texts if all retries fail
+          return { translatedTexts: input.textsToTranslate };
+        }
+        const delay = initialDelay * Math.pow(2, retries - 1); // Exponential backoff
+        console.warn(`Translate Flow: Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
     }
     
 
