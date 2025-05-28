@@ -23,6 +23,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Add other domains if your logo might be hosted elsewhere in the future
+      // For example, if you use a CMS:
+      // {
+      //   protocol: 'https',
+      //   hostname: 'cdn.your-cms.com',
+      // },
     ],
   },
 };

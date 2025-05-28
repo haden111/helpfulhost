@@ -1,3 +1,4 @@
+
 import { InstructionContent } from '@/components/custom/InstructionContent';
 import { instructionsData, type InstructionLocation } from '@/lib/instructions-data';
 import { AlertTriangle } from 'lucide-react';
@@ -56,7 +57,7 @@ export default function InstructionPage({ params }: InstructionPageProps) {
 
 export async function generateMetadata({ params }: InstructionPageProps) {
   const locationData = instructionsData[params.locationCode];
-  const title = locationData ? `${locationData.defaultTexts.title} - Haden's Helpful Host` : "Instructions - Haden's Helpful Host";
+  const title = locationData ? `${locationData.defaultTexts.title} - Haden's Airbnb` : "Instructions - Haden's Airbnb";
   return {
     title,
   };

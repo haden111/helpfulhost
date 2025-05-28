@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
@@ -18,10 +19,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Haden's Helpful Host",
-  description: 'Your friendly guide for a comfortable stay.',
+  title: "Haden's Airbnb",
+  description: 'Your friendly guide for a comfortable stay at Haden\'s Airbnb.',
   icons: {
-    icon: '/favicon.ico', // Assuming a favicon might be added later
+    icon: '/favicon.ico', // Assuming a favicon might be added later or derived from logo
   },
 };
 
@@ -37,9 +38,6 @@ export default async function RootLayout({
 }>) {
   const requestHeaders = headers();
   const acceptLanguageHeader = requestHeaders.get('accept-language');
-  // Note: IP address detection might be complex/unreliable in some hosting environments.
-  // 'x-forwarded-for' is common but can be spoofed. Vercel provides 'x-vercel-ip-city', etc.
-  // For simplicity, we mainly rely on accept-language header.
   const ipAddress = requestHeaders.get('x-forwarded-for')?.split(',')[0].trim() || 
                     requestHeaders.get('x-real-ip')?.split(',')[0].trim();
 
@@ -54,7 +52,7 @@ export default async function RootLayout({
       autoDetectInput.ipAddress = ipAddress;
     }
 
-    if (Object.keys(autoDetectInput).length > 0) { // Only call if we have some input
+    if (Object.keys(autoDetectInput).length > 0) {
       const result = await autoDetectLanguage(autoDetectInput);
       if (result.languageCode) {
         detectedLanguageCode = result.languageCode.split('-')[0].toLowerCase();
@@ -62,13 +60,11 @@ export default async function RootLayout({
     }
   } catch (error) {
     console.error("Error auto-detecting language via AI, falling back:", error);
-    // Fallback to browser's primary language or 'en' will be handled by LanguageProvider
     if (acceptLanguageHeader) {
         detectedLanguageCode = acceptLanguageHeader.split(',')[0].split('-')[0].toLowerCase();
     }
   }
   
-  // The LanguageProvider will handle cookie override and validation against supported languages.
   const initialLangForHtml = detectedLanguageCode || 'en';
 
   return (
@@ -81,7 +77,7 @@ export default async function RootLayout({
               {children}
             </main>
             <footer className="py-6 text-center text-sm text-muted-foreground border-t">
-              © {new Date().getFullYear()} Haden's Helpful Host. All rights reserved.
+              © {new Date().getFullYear()} Haden's Airbnb. All rights reserved.
             </footer>
           </div>
           <Toaster />
