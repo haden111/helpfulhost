@@ -36,14 +36,12 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
     }
     
     if (!language) {
-        // This case should ideally not happen if context provides a default language
         setError("Language not available for translation.");
         setIsLoading(false);
         return;
     }
 
-    // Use default English text if target language is English to avoid unnecessary API calls
-    if (language === 'en') {
+    if (language.toLowerCase() === 'en') {
       setTranslatedTitle(locationData.defaultTexts.title);
       setTranslatedSteps(locationData.defaultTexts.steps);
       setIsLoading(false);
@@ -51,29 +49,47 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
     }
 
     try {
-      const titlePromise = translateInstructionalText({
-        text: locationData.defaultTexts.title,
+      const textsToTranslate: Record<string, string> = {
+        title: locationData.defaultTexts.title,
+      };
+      locationData.defaultTexts.steps.forEach((step, index) => {
+        textsToTranslate[`step_${index}`] = step;
+      });
+
+      const result = await translateInstructionalText({
+        textsToTranslate,
         language: language,
       });
-      const stepsPromises = locationData.defaultTexts.steps.map(step =>
-        translateInstructionalText({ text: step, language: language })
-      );
 
-      const [titleResult, ...stepsResults] = await Promise.all([titlePromise, ...stepsPromises]);
-      
-      setTranslatedTitle(titleResult.translatedText);
-      setTranslatedSteps(stepsResults.map(r => r.translatedText));
+      const { translatedTexts } = result;
+
+      if (translatedTexts && translatedTexts.title) {
+        setTranslatedTitle(translatedTexts.title);
+      } else {
+        console.warn(`Missing translation for title in InstructionContent. Falling back to default.`);
+        setTranslatedTitle(locationData.defaultTexts.title);
+      }
+
+      const newTranslatedSteps: string[] = [];
+      locationData.defaultTexts.steps.forEach((_, index) => {
+        if (translatedTexts && translatedTexts[`step_${index}`]) {
+          newTranslatedSteps.push(translatedTexts[`step_${index}`]);
+        } else {
+          console.warn(`Missing translation for step_${index} in InstructionContent. Falling back to default.`);
+          newTranslatedSteps.push(locationData.defaultTexts.steps[index]); // Fallback to default for this specific step
+        }
+      });
+      setTranslatedSteps(newTranslatedSteps);
 
     } catch (e) {
       console.error('Translation error in InstructionContent:', e);
       setError('Failed to translate content. Displaying in English.');
       toast({
-        title: 'Translation Failed (Main Content)',
+        title: 'Translation Failed (Instructions)',
         description: 'Could not translate instructions. Showing default language. Please try another language or check console for errors.',
         variant: 'destructive',
-        duration: 5000, // Make toast more visible
+        duration: 7000, 
       });
-      // Fallback to default English text on error
       setTranslatedTitle(locationData.defaultTexts.title);
       setTranslatedSteps(locationData.defaultTexts.steps);
     } finally {
@@ -112,7 +128,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
             )}
           </div>
           <div className="w-full md:w-1/2 p-4 md:p-6 space-y-4">
-            {error && !isLoading && ( // Only show error if not loading
+            {error && !isLoading && ( 
               <Alert variant="destructive" className="mb-4">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Translation Error</AlertTitle>
@@ -135,12 +151,18 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                     <span className="text-base">{step}</span>
                   </li>
                 ))}
-                {/* Show a message if steps are empty but not loading and no error specifically for steps */}
                 {translatedSteps.length === 0 && !error && !isLoading && locationData?.defaultTexts?.steps?.length > 0 && (
                    <Alert>
                     <Info className="h-4 w-4" />
                     <AlertTitle>Instructions Loading</AlertTitle>
                     <AlertDescription>Translated steps will appear here shortly.</AlertDescription>
+                  </Alert>
+                )}
+                 {translatedSteps.length === 0 && locationData?.defaultTexts?.steps?.length === 0 && !isLoading && (
+                  <Alert variant="default">
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>No Instructions</AlertTitle>
+                    <AlertDescription>There are currently no detailed steps for this item.</AlertDescription>
                   </Alert>
                 )}
               </ul>

@@ -17,6 +17,7 @@ const DEFAULT_TEXTS = {
   languageSelectionInfo: "Simply choose your language from the selection box at thetop of the page to view the guide in your preferred language.",
   quickAccessHeader: "Quick Access Instructions:",
 };
+type DefaultTextKeys = keyof typeof DEFAULT_TEXTS;
 
 export function WelcomeMessage() {
   const { language } = useLanguage();
@@ -28,7 +29,7 @@ export function WelcomeMessage() {
 
   const translateAllTexts = useCallback(async () => {
     if (!language) {
-      setIsLoading(true); // Keep loading if language isn't available yet
+      setIsLoading(true); 
       return;
     }
 
@@ -42,15 +43,21 @@ export function WelcomeMessage() {
     }
 
     try {
-      const translations = await Promise.all(
-        Object.entries(DEFAULT_TEXTS).map(async ([key, text]) => {
-          const result = await translateInstructionalText({ text, language });
-          return { [key]: result.translatedText };
-        })
-      );
-
-      const newTranslatedTexts = translations.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-      setTranslatedTexts(newTranslatedTexts as typeof DEFAULT_TEXTS);
+      const result = await translateInstructionalText({ 
+        textsToTranslate: DEFAULT_TEXTS, 
+        language 
+      });
+      
+      // Ensure all keys are present in the result, fallback to default if not
+      const updatedTexts = { ...DEFAULT_TEXTS };
+      for (const key of Object.keys(DEFAULT_TEXTS) as DefaultTextKeys[]) {
+        if (result.translatedTexts && result.translatedTexts[key]) {
+          updatedTexts[key] = result.translatedTexts[key];
+        } else {
+          console.warn(`Missing translation for key: ${key} in WelcomeMessage. Falling back to default.`);
+        }
+      }
+      setTranslatedTexts(updatedTexts);
 
     } catch (e) {
       console.error('Translation error in WelcomeMessage:', e);
