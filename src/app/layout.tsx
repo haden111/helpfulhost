@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#D0BFFF', // Primary color
+  themeColor: '#FFFFFF', // Updated to white background
 };
 
 
@@ -77,7 +77,8 @@ export default async function RootLayout({
               {children}
             </main>
             <footer className="py-6 text-center text-sm text-muted-foreground border-t">
-              © {new Date().getFullYear()} Haden's Airbnb. All rights reserved.
+              <p>© {new Date().getFullYear()} Haden's Airbnb. All rights reserved.</p>
+              <p className="mt-2">If you have further questions, send a question to Haden via the Airbnb app.</p>
             </footer>
           </div>
           <Toaster />
