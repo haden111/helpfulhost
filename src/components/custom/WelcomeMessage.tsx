@@ -48,16 +48,31 @@ export function WelcomeMessage() {
         language 
       });
       
-      // Ensure all keys are present in the result, fallback to default if not
       const updatedTexts = { ...DEFAULT_TEXTS };
+      let allTranslationsAreIdenticalToDefault = true;
+
       for (const key of Object.keys(DEFAULT_TEXTS) as DefaultTextKeys[]) {
-        if (result.translatedTexts && result.translatedTexts[key]) {
+        if (result.translatedTexts && typeof result.translatedTexts[key] === 'string') {
           updatedTexts[key] = result.translatedTexts[key];
+          if (result.translatedTexts[key] !== DEFAULT_TEXTS[key]) {
+            allTranslationsAreIdenticalToDefault = false;
+          }
         } else {
-          console.warn(`Missing translation for key: ${key} in WelcomeMessage. Falling back to default.`);
+          console.warn(`WelcomeMessage: Missing translation for key: ${key}. Falling back to default.`);
+          // updatedTexts[key] is already the default from ...DEFAULT_TEXTS
         }
       }
       setTranslatedTexts(updatedTexts);
+
+      if (allTranslationsAreIdenticalToDefault && language.toLowerCase() !== 'en') {
+        console.warn(`WelcomeMessage: Received translations for language '${language}' are identical to English defaults. Upstream fallback likely occurred.`);
+        toast({
+            title: 'Translation May Be Incomplete (Welcome)',
+            description: `Displaying content in English as translation to ${language} might not have been fully successful.`,
+            variant: 'default',
+            duration: 7000,
+        });
+      }
 
     } catch (e) {
       console.error('Translation error in WelcomeMessage:', e);
@@ -68,7 +83,7 @@ export function WelcomeMessage() {
         variant: 'destructive',
         duration: 5000,
       });
-      setTranslatedTexts(DEFAULT_TEXTS); // Fallback to default
+      setTranslatedTexts(DEFAULT_TEXTS); // Fallback to default on error
     } finally {
       setIsLoading(false);
     }

@@ -36,7 +36,9 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
     }
     
     if (!language) {
-        setError("Language not available for translation.");
+        // This case should ideally be handled by the language context providing a default
+        setTranslatedTitle(locationData.defaultTexts.title);
+        setTranslatedSteps(locationData.defaultTexts.steps);
         setIsLoading(false);
         return;
     }
@@ -61,32 +63,54 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         language: language,
       });
 
-      const { translatedTexts } = result;
+      const { translatedTexts: R_translatedTexts } = result; // Renamed to avoid confusion
+      let newTranslatedTitle = locationData.defaultTexts.title;
+      let newTranslatedSteps: string[] = [...locationData.defaultTexts.steps];
+      let titleIsIdenticalToDefault = true;
+      let stepsAreIdenticalToDefault = true;
 
-      if (translatedTexts && translatedTexts.title) {
-        setTranslatedTitle(translatedTexts.title);
+      if (R_translatedTexts && typeof R_translatedTexts.title === 'string') {
+        newTranslatedTitle = R_translatedTexts.title;
+        if (R_translatedTexts.title !== locationData.defaultTexts.title) {
+          titleIsIdenticalToDefault = false;
+        }
       } else {
-        console.warn(`Missing translation for title in InstructionContent. Falling back to default.`);
-        setTranslatedTitle(locationData.defaultTexts.title);
+        console.warn(`InstructionContent: Missing translation for title. Falling back to default.`);
       }
+      setTranslatedTitle(newTranslatedTitle);
 
-      const newTranslatedSteps: string[] = [];
-      locationData.defaultTexts.steps.forEach((_, index) => {
-        if (translatedTexts && translatedTexts[`step_${index}`]) {
-          newTranslatedSteps.push(translatedTexts[`step_${index}`]);
+      const tempTranslatedSteps: string[] = [];
+      locationData.defaultTexts.steps.forEach((defaultStep, index) => {
+        if (R_translatedTexts && typeof R_translatedTexts[`step_${index}`] === 'string') {
+          tempTranslatedSteps.push(R_translatedTexts[`step_${index}`]);
+          if (R_translatedTexts[`step_${index}`] !== defaultStep) {
+            stepsAreIdenticalToDefault = false;
+          }
         } else {
-          console.warn(`Missing translation for step_${index} in InstructionContent. Falling back to default.`);
-          newTranslatedSteps.push(locationData.defaultTexts.steps[index]); // Fallback to default for this specific step
+          console.warn(`InstructionContent: Missing translation for step_${index}. Falling back to default.`);
+          tempTranslatedSteps.push(defaultStep); // Fallback for this specific step
         }
       });
-      setTranslatedSteps(newTranslatedSteps);
+      setTranslatedSteps(tempTranslatedSteps);
+      newTranslatedSteps = tempTranslatedSteps;
+
+
+      if ((titleIsIdenticalToDefault && stepsAreIdenticalToDefault) && language.toLowerCase() !== 'en') {
+        console.warn(`InstructionContent: Received translations for language '${language}' are identical to English defaults for "${locationData.defaultTexts.title}". Upstream fallback likely occurred.`);
+        toast({
+            title: 'Translation May Be Incomplete (Instructions)',
+            description: `Displaying content in English as translation to ${language} for "${locationData.defaultTexts.title}" might not have been fully successful.`,
+            variant: 'default',
+            duration: 7000,
+        });
+      }
 
     } catch (e) {
       console.error('Translation error in InstructionContent:', e);
-      setError('Failed to translate content. Displaying in English.');
+      setError(`Failed to translate content for "${locationData.defaultTexts.title}". Displaying in English.`);
       toast({
-        title: 'Translation Failed (Instructions)',
-        description: 'Could not translate instructions. Showing default language. Please try another language or check console for errors.',
+        title: `Translation Failed (${locationData.defaultTexts.title})`,
+        description: 'Could not translate instructions. Showing default language.',
         variant: 'destructive',
         duration: 7000, 
       });
@@ -98,8 +122,23 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
   }, [language, locationData, toast]);
 
   useEffect(() => {
-    translateContent();
-  }, [translateContent]);
+    if (locationData) { // Ensure locationData is available before translating
+        translateContent();
+    } else {
+        setIsLoading(false);
+        setError("Instruction data is not available.");
+    }
+  }, [translateContent, locationData]);
+
+  if (!locationData && !isLoading) {
+    return (
+         <Alert variant="destructive" className="my-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>Instruction data is missing and content cannot be displayed.</AlertDescription>
+        </Alert>
+    );
+  }
 
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-xl overflow-hidden">
@@ -131,7 +170,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
             {error && !isLoading && ( 
               <Alert variant="destructive" className="mb-4">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Translation Error</AlertTitle>
+                <AlertTitle>Translation Issue</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
