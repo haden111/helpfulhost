@@ -20,9 +20,11 @@ export default function WelcomePage() {
               priority
             />
           </div>
-          <CardTitle className="text-3xl font-bold text-primary">Welcome to Haden's Airbnb!</CardTitle>
-          <CardDescription className="text-foreground/80 mt-2 text-base">
-            Your friendly guide to a comfortable and enjoyable stay.
+          <CardTitle className="text-3xl font-bold text-primary">A Warm Welcome to Haden's Airbnb</CardTitle>
+          <CardDescription className="text-foreground/80 mt-2 text-base space-y-3">
+            <p>Thank you for being our guest! We're delighted to have you stay.</p>
+            <p>This digital guide is here to provide you with all the information you need for a comfortable and convenient stay. Whether you need instructions for the appliances, details about the Wi-Fi, or guidance on recycling, you'll find it here in your own language.</p>
+            <p>Simply choose your language from the selection box at the top of the page to view the guide in your preferred language.</p>
           </CardDescription>
         </CardHeader>
         <CardContent className="p-8 space-y-8">
@@ -64,3 +66,4 @@ export default function WelcomePage() {
     </div>
   );
 }
+
