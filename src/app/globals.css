@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 96.1%; /* Very light gray #F5F5F5 */
+    --background: 0 0% 100%; /* White */
     --foreground: 0 0% 3.9%; /* Standard dark text */
 
     --card: 0 0% 100%; /* White cards */
@@ -20,7 +20,7 @@
     --secondary: 255 90% 92%; /* Lighter lavender for secondary elements */
     --secondary-foreground: 255 40% 30%;
 
-    --muted: 0 0% 90%; /* Slightly darker than background for muted text/elements */
+    --muted: 0 0% 96.1%; /* Light gray for muted elements, slightly off-white */
     --muted-foreground: 0 0% 45.1%; /* Default */
 
     --accent: 276 100% 88%; /* Pale violet #E6C5FF */
