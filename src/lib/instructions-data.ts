@@ -17,7 +17,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
     defaultTexts: {
       title: "Front Door Instructions",
       steps: [
-        "To unlock the door, enter the code: 1234#.",
+        "To unlock the door, enter the code: 1234.", // Removed the '#'
         "To lock the door, press the Schlage button once.",
       ],
     },

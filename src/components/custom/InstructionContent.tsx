@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -25,10 +26,21 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
   const [error, setError] = useState<string | null>(null);
 
   const translateContent = useCallback(async () => {
-    if (!locationData) return;
-
     setIsLoading(true);
     setError(null);
+
+    if (!locationData) {
+        setError("Instruction data is missing.");
+        setIsLoading(false);
+        return;
+    }
+    
+    if (!language) {
+        // This case should ideally not happen if context provides a default language
+        setError("Language not available for translation.");
+        setIsLoading(false);
+        return;
+    }
 
     // Use default English text if target language is English to avoid unnecessary API calls
     if (language === 'en') {
@@ -53,12 +65,13 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
       setTranslatedSteps(stepsResults.map(r => r.translatedText));
 
     } catch (e) {
-      console.error('Translation error:', e);
+      console.error('Translation error in InstructionContent:', e);
       setError('Failed to translate content. Displaying in English.');
       toast({
-        title: 'Translation Failed',
-        description: 'Could not translate instructions. Showing default language.',
+        title: 'Translation Failed (Main Content)',
+        description: 'Could not translate instructions. Showing default language. Please try another language or check console for errors.',
         variant: 'destructive',
+        duration: 5000, // Make toast more visible
       });
       // Fallback to default English text on error
       setTranslatedTitle(locationData.defaultTexts.title);
@@ -80,24 +93,26 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         ) : (
           <CardTitle className="text-2xl md:text-3xl font-semibold text-primary flex items-center gap-2">
             <Info className="h-7 w-7 text-primary" />
-            {translatedTitle}
+            {translatedTitle || locationData?.defaultTexts?.title}
           </CardTitle>
         )}
       </CardHeader>
       <CardContent className="p-0">
         <div className="flex flex-col md:flex-row">
           <div className="w-full md:w-1/2 relative aspect-[4/3] md:aspect-auto">
-            <Image
-              src={locationData.image}
-              alt={translatedTitle || locationData.defaultTexts.title}
-              layout="fill"
-              objectFit="cover"
-              data-ai-hint={locationData.dataAiHint}
-              priority
-            />
+            {locationData?.image && (
+              <Image
+                src={locationData.image}
+                alt={translatedTitle || locationData.defaultTexts.title}
+                layout="fill"
+                objectFit="cover"
+                data-ai-hint={locationData.dataAiHint}
+                priority
+              />
+            )}
           </div>
           <div className="w-full md:w-1/2 p-4 md:p-6 space-y-4">
-            {error && (
+            {error && !isLoading && ( // Only show error if not loading
               <Alert variant="destructive" className="mb-4">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Translation Error</AlertTitle>
@@ -120,6 +135,14 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                     <span className="text-base">{step}</span>
                   </li>
                 ))}
+                {/* Show a message if steps are empty but not loading and no error specifically for steps */}
+                {translatedSteps.length === 0 && !error && !isLoading && locationData?.defaultTexts?.steps?.length > 0 && (
+                   <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Instructions Loading</AlertTitle>
+                    <AlertDescription>Translated steps will appear here shortly.</AlertDescription>
+                  </Alert>
+                )}
               </ul>
             )}
           </div>
