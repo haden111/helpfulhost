@@ -11,11 +11,11 @@ export function Header() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-lg sm:text-xl font-semibold text-primary hover:text-primary/80 transition-colors">
           <Image
-            src="/haden-logo.png" // Assuming the logo is saved as public/haden-logo.png
+            src="/haden.png" 
             alt="Haden's Airbnb Logo"
-            width={40} // Adjust width as needed
-            height={40} // Adjust height as needed
-            className="h-10 w-auto" // Maintain aspect ratio, adjust height
+            width={40} 
+            height={40} 
+            className="h-10 w-auto" 
             priority
           />
           <span className="hidden sm:inline-block whitespace-nowrap">Haden's Airbnb</span>

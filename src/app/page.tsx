@@ -12,11 +12,11 @@ export default function WelcomePage() {
         <CardHeader className="text-center bg-primary/20 p-8">
           <div className="mx-auto mb-6 flex justify-center">
             <Image
-              src="/haden-logo.png" // Assuming the logo is saved as public/haden-logo.png
+              src="/haden.png" 
               alt="Haden's Airbnb Logo"
-              width={100} // Adjust width as needed
-              height={100} // Adjust height as needed
-              className="h-24 w-auto rounded-full" // Example styling
+              width={100} 
+              height={100} 
+              className="h-24 w-auto rounded-full" 
               priority
             />
           </div>
