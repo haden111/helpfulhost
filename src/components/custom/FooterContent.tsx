@@ -6,7 +6,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { translateInstructionalText } from '@/ai/flows/translate-instructional-text';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const DEFAULT_FOOTER_MESSAGE = "If you have further questions, send a question to Haden via the Airbnb app.";
+const DEFAULT_FOOTER_MESSAGE = "If you have further questions, send a message to Haden via the Airbnb app.";
 const DEFAULT_COPYRIGHT_START = "© ";
 const DEFAULT_COPYRIGHT_END = " Haden's Airbnb. All rights reserved.";
 
