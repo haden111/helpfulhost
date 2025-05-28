@@ -32,10 +32,10 @@ const TranslateInstructionalTextOutputSchema = z.object({
 });
 export type TranslateInstructionalTextOutput = z.infer<typeof TranslateInstructionalTextOutputSchema>;
 
-// This is what the LLM is prompted to return DIRECTLY
-const LLMDirectOutputSchema = z.record(
-  z.string().describe("The translated text string, corresponding to its input key.")
-).describe("An object where keys match the input and values are the translated text strings. THIS IS THE DIRECT OUTPUT FROM THE LLM.");
+// This is what the LLM is prompted to return DIRECTLY: a JSON string
+const LLMJsonStringOutputSchema = z.string().describe(
+  "A JSON string where keys match the input and values are the translated text strings. Example: '{\"key1\":\"translated_value1\",\"key2\":\"translated_value2\"}'"
+);
 
 
 export async function translateInstructionalText(
@@ -50,17 +50,20 @@ export async function translateInstructionalText(
 
 const translateInstructionalTextPrompt = ai.definePrompt({
   name: 'translateInstructionalTextPrompt',
-  input: {schema: TranslateInstructionalTextPromptInputSchema}, // Use the schema with stringified JSON
-  output: {schema: LLMDirectOutputSchema}, // LLM returns the inner object directly
+  input: {schema: TranslateInstructionalTextPromptInputSchema},
+  output: {schema: LLMJsonStringOutputSchema}, // LLM returns a JSON string
   prompt: `You are a professional translator. Translate the values of the following JSON object from their original language into {{language}}.
-Return a JSON object with the exact same keys as the input, but with the string values translated to {{language}}.
+Input JSON string to translate:
+{{{textsToTranslateJsonString}}}
+
+Respond ONLY with a single, valid JSON string that represents an object with the exact same keys as the input, but with the string values translated to {{language}}.
 Preserve the original meaning, tone, and any special characters or placeholders (like "{variable_name}") as accurately as possible in the target language.
 If a text contains what appears to be code, a placeholder, or a non-translatable entity (e.g., "1234", "Schlage button", "HDMI1"), keep it as is.
 
-Input JSON:
-{{{textsToTranslateJsonString}}}
+Example of expected output format if input was '{"greeting":"Hello", "farewell":"Goodbye"}' and language was 'es':
+'{"greeting":"Hola", "farewell":"Adiós"}'
 
-Respond ONLY with the translated JSON object. Ensure your response is a single, valid JSON object and nothing else.
+Ensure your response is ONLY the JSON string and nothing else.
 `,
 });
 
@@ -71,7 +74,6 @@ const translateInstructionalTextFlow = ai.defineFlow(
     outputSchema: TranslateInstructionalTextOutputSchema, // Flow still adheres to this final output structure
   },
   async (input): Promise<TranslateInstructionalTextOutput> => {
-    // This initial check is also in the exported function, but good for direct flow calls too.
     if (Object.keys(input.textsToTranslate).length === 0) {
       return { translatedTexts: {} };
     }
@@ -81,48 +83,48 @@ const translateInstructionalTextFlow = ai.defineFlow(
       language: input.language,
     };
 
-    const {output: llmOutput} = await translateInstructionalTextPrompt(promptInput);
+    const {output: llmOutputJsonString} = await translateInstructionalTextPrompt(promptInput);
 
-    // Validate the direct LLM output
-    if (!llmOutput || typeof llmOutput !== 'object') {
-        console.error("LLM translation output is missing or not an object. LLM Output:", llmOutput, "Input:", input.textsToTranslate);
-        // Attempt to parse if llmOutput is a string that looks like JSON
-        if (typeof llmOutput === 'string') {
-          try {
-            const parsedOutput = JSON.parse(llmOutput);
-            if (typeof parsedOutput === 'object' && parsedOutput !== null) {
-              // If parsing succeeds and it's an object, use it. Otherwise, proceed to fallback.
-              // This is a common failure mode where the LLM returns a JSON string instead of an object.
-              // The schema validation might have already caught this if the prompt output schema was strict.
-              // However, if the schema allows for string | object or similar, this manual check is useful.
-              // Given LLMDirectOutputSchema is z.record(z.string()), a string won't pass, so this is more for robustness.
-            } else {
-              return { translatedTexts: input.textsToTranslate }; // Fallback
-            }
-          } catch (parseError) {
-            console.error("LLM output was a string, but failed to parse as JSON:", parseError);
-            return { translatedTexts: input.textsToTranslate }; // Fallback
-          }
-        } else {
-          return { translatedTexts: input.textsToTranslate }; // Fallback if not object and not string
-        }
+    if (!llmOutputJsonString || typeof llmOutputJsonString !== 'string') {
+        console.error("LLM translation output is missing or not a string. LLM Output:", llmOutputJsonString, "Input:", input.textsToTranslate);
+        return { translatedTexts: input.textsToTranslate }; // Fallback
+    }
+
+    let parsedOutput: Record<string, string>;
+    try {
+      // Attempt to clean common LLM artifacts like backticks around JSON
+      const cleanedJsonString = llmOutputJsonString.trim().replace(/^```json\s*([\s\S]*?)\s*```$/gm, '$1').trim();
+      parsedOutput = JSON.parse(cleanedJsonString);
+      if (typeof parsedOutput !== 'object' || parsedOutput === null) {
+        console.error("LLM output parsed to non-object:", parsedOutput, "Original string:", llmOutputJsonString, "Cleaned string:", cleanedJsonString);
+        return { translatedTexts: input.textsToTranslate }; // Fallback
+      }
+    } catch (parseError) {
+      console.error("LLM output was a string, but failed to parse as JSON:", parseError, "Original string:", llmOutputJsonString);
+      return { translatedTexts: input.textsToTranslate }; // Fallback
     }
     
-    // If LLM output an empty object {} but input was not empty, it's an issue.
-    // This check should come before trying to iterate over llmOutput keys if it might be empty.
-    if (Object.keys(input.textsToTranslate).length > 0 && Object.keys(llmOutput).length === 0) {
-        console.error("LLM translation output was an empty object when input was not empty. LLM Output:", llmOutput, "Input:", input.textsToTranslate);
-        return { translatedTexts: input.textsToTranslate };
+    if (Object.keys(input.textsToTranslate).length > 0 && Object.keys(parsedOutput).length === 0 && llmOutputJsonString.trim() !== '{}' && llmOutputJsonString.trim() !== '""') {
+        console.warn("LLM translation output parsed to an empty object when input was not empty. Parsed Output:", parsedOutput, "Input:", input.textsToTranslate, "Original string:", llmOutputJsonString);
+        // If the original string was just empty or an empty object string, this might be fine. Otherwise, it's a problem.
+        // We can be more lenient here, or strict. For now, if input wasn't empty and output became empty AND it wasn't intentional, consider fallback.
+        // This case is tricky. Let's assume if the model truly intended an empty object, the string would be "{}".
+        // If it's empty for other reasons, it might be a sign of a problem.
+         if (Object.keys(input.textsToTranslate).length > 0 && Object.keys(parsedOutput).length === 0) {
+            // This condition implies the model returned an empty JSON object string, like "{}"
+            // If the input wasn't empty, this might be an issue if not all keys were optional or translated to empty.
+            // However, our current logic below handles missing keys by falling back.
+         }
     }
     
     const resultTexts: Record<string, string> = {};
     let someKeysProblematic = false;
     for (const key in input.textsToTranslate) {
       if (Object.prototype.hasOwnProperty.call(input.textsToTranslate, key)) { // Iterate over input keys
-        if (Object.prototype.hasOwnProperty.call(llmOutput, key) && typeof llmOutput[key] === 'string') {
-          resultTexts[key] = llmOutput[key];
+        if (Object.prototype.hasOwnProperty.call(parsedOutput, key) && typeof parsedOutput[key] === 'string') {
+          resultTexts[key] = parsedOutput[key];
         } else {
-          console.warn(`LLM translation output missing or malformed for key: "${key}". Falling back to original for this key. LLM Output for key: `, llmOutput[key]);
+          console.warn(`Parsed LLM translation output missing or malformed for key: "${key}". Falling back to original for this key. Parsed output for key: `, parsedOutput[key]);
           resultTexts[key] = input.textsToTranslate[key]; // Fallback for this specific key
           someKeysProblematic = true;
         }
@@ -130,10 +132,9 @@ const translateInstructionalTextFlow = ai.defineFlow(
     }
 
     if (someKeysProblematic) {
-      console.warn("Some keys were missing or malformed in LLM output. The final result includes fallbacks for those keys. Result:", resultTexts, "LLM Output:", llmOutput);
+      console.warn("Some keys were missing or malformed in parsed LLM output. The final result includes fallbacks for those keys. Result:", resultTexts, "Parsed Output:", parsedOutput, "Original string:", llmOutputJsonString);
     }
     
     return { translatedTexts: resultTexts };
   }
 );
-
