@@ -69,7 +69,7 @@ Ensure your response is ONLY the JSON string and nothing else. If you cannot per
     safetySettings: [
       {
         category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-        threshold: 'BLOCK_NONE', // More permissive for dangerous content
+        threshold: 'BLOCK_NONE',
       },
       {
         category: 'HARM_CATEGORY_HATE_SPEECH',
@@ -106,7 +106,7 @@ const translateInstructionalTextFlow = ai.defineFlow(
     const {output: llmOutputJsonString} = await translateInstructionalTextPrompt(promptInput);
 
     if (llmOutputJsonString === null || typeof llmOutputJsonString !== 'string') {
-        console.error("LLM translation output is null or not a string. LLM Output:", llmOutputJsonString, "Input:", input.textsToTranslate);
+        console.warn("LLM translation output is null or not a string. Falling back to original. LLM Output:", llmOutputJsonString, "Input:", input.textsToTranslate);
         return { translatedTexts: input.textsToTranslate }; // Fallback
     }
 
@@ -114,25 +114,24 @@ const translateInstructionalTextFlow = ai.defineFlow(
     try {
       // Attempt to clean common LLM artifacts like backticks around JSON
       const cleanedJsonString = llmOutputJsonString.trim().replace(/^```json\s*([\s\S]*?)\s*```$/gm, '$1').trim();
-      if (cleanedJsonString === "") { // Handle case where LLM might return an empty string after cleaning
+      if (cleanedJsonString === "") { 
         console.warn("LLM translation output was an empty string after cleaning. Falling back. Original string:", llmOutputJsonString);
         return { translatedTexts: input.textsToTranslate }; // Fallback
       }
       parsedOutput = JSON.parse(cleanedJsonString);
-      if (typeof parsedOutput !== 'object' || parsedOutput === null) { // Check if parsed to a non-null object
-        console.error("LLM output parsed to non-object or null:", parsedOutput, "Original string:", llmOutputJsonString, "Cleaned string:", cleanedJsonString);
+      if (typeof parsedOutput !== 'object' || parsedOutput === null) { 
+        console.warn("LLM output parsed to non-object or null. Falling back. Parsed:", parsedOutput, "Original string:", llmOutputJsonString, "Cleaned string:", cleanedJsonString);
         return { translatedTexts: input.textsToTranslate }; // Fallback
       }
     } catch (parseError) {
-      console.error("LLM output was a string, but failed to parse as JSON:", parseError, "Original string:", llmOutputJsonString);
+      console.warn("LLM output was a string, but failed to parse as JSON. Falling back. Error:", parseError, "Original string:", llmOutputJsonString);
       return { translatedTexts: input.textsToTranslate }; // Fallback
     }
     
     // Check if the parsed output is an empty object when the input was not empty.
-    // This could indicate an issue if the model returned "{}" for a non-empty input.
     if (Object.keys(input.textsToTranslate).length > 0 && Object.keys(parsedOutput).length === 0 && llmOutputJsonString.trim() !== '{}') {
         console.warn("LLM translation output parsed to an empty object when input was not empty and original string was not '{}'. Parsed Output:", parsedOutput, "Input:", input.textsToTranslate, "Original string:", llmOutputJsonString);
-        // Potentially a problematic case, but the key-by-key fallback below will handle it.
+        // This might be problematic, but the key-by-key fallback below will handle it by returning originals.
     }
     
     const resultTexts: Record<string, string> = {};
