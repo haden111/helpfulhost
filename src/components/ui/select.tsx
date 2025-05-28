@@ -87,8 +87,11 @@ const SelectContent = React.forwardRef<
       <SelectPrimitive.Viewport
         className={cn(
           "p-1",
+          "overflow-y-auto", // Ensure viewport itself can scroll.
+          // When position is popper, viewport should utilize available width and min-width based on trigger.
+          // Height will be constrained by SelectContent's max-h-96.
           position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+            "w-full min-w-[var(--radix-select-trigger-width)]"
         )}
       >
         {children}
