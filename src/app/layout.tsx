@@ -68,7 +68,7 @@ export default async function RootLayout({
   const initialLangForHtml = detectedLanguageCode || 'en';
 
   return (
-    <html lang={initialLangForHtml} suppressHydrationWarning>
+    <html lang={initialLangForHtml} className="light" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased text-foreground bg-background`}>
         <LanguageProvider initialDetectedLanguage={detectedLanguageCode}>
           <div className="flex flex-col min-h-screen">
