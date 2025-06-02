@@ -13,29 +13,31 @@ export interface InstructionLocation {
   };
   image: string; // Main image for the location
   dataAiHint: string; // AI hint for the main image
+  linkIconEmoji?: string; // Optional: Emoji to use for links to this POI
 }
 
 export const instructionsData: Record<string, InstructionLocation> = {
   "front-door": {
     defaultTexts: {
-      title: "Front Door Instructions 🔑", // Example Emoji
+      title: "Front Door Instructions 🔑",
       steps: [
         {
           text: "To unlock the door, enter the code: 1234.",
           image: "https://placehold.co/370x500.png",
           dataAiHint: "keypad door",
-          textColor: "green", // Example Green Text
+          textColor: "green",
         },
         {
           text: "To lock the door, press the Schlage button once. ❗Ensure it's fully locked.",
           image: "https://placehold.co/370x500.png",
           dataAiHint: "door lock",
-          textColor: "red", // Example Red Text
+          textColor: "red",
         },
       ],
     },
     image: "https://placehold.co/800x450.png",
     dataAiHint: "door entrance",
+    linkIconEmoji: "🔑",
   },
   "living-room-tv": {
     defaultTexts: {
@@ -61,6 +63,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
     },
     image: "https://placehold.co/800x450.png",
     dataAiHint: "television remote",
+    linkIconEmoji: "📺",
   },
   "kitchen-coffee-machine": {
     defaultTexts: {
@@ -91,5 +94,6 @@ export const instructionsData: Record<string, InstructionLocation> = {
     },
     image: "https://placehold.co/800x450.png",
     dataAiHint: "coffee maker",
+    linkIconEmoji: "☕",
   },
 };
