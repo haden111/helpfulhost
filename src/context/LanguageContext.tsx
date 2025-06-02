@@ -4,7 +4,6 @@
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supportedLanguages, type Language } from '@/lib/languages';
-// Removed useToast import
 
 const COOKIE_NAME = 'hadens-helpful-host-lang';
 
@@ -43,27 +42,31 @@ export const LanguageProvider = ({
   children: ReactNode;
   initialDetectedLanguage: string | null;
 }) => {
-  // Removed toast instance
 
+  // This function is memoized and provided to context consumers.
   const isLanguageSupported = useCallback((langCode: string): boolean => {
     return supportedLanguages.some(l => l.code.toLowerCase() === langCode.toLowerCase());
   }, []);
 
-  // Initialize state using a function for one-time computation
+  // Initialize state using a function for one-time computation.
+  // The logic for checking support is inlined here to avoid calling the useCallback version from the initializer.
   const [currentLanguage, setCurrentLanguageState] = useState<string>(() => {
+    const checkSupportForInit = (code: string): boolean => 
+      supportedLanguages.some(l => l.code.toLowerCase() === code.toLowerCase());
+
     const langFromCookie = getCookie(COOKIE_NAME);
-    if (langFromCookie && isLanguageSupported(langFromCookie)) {
+    if (langFromCookie && checkSupportForInit(langFromCookie)) {
       return langFromCookie;
     }
 
     if (initialDetectedLanguage) {
       const baseLang = initialDetectedLanguage.split('-')[0].toLowerCase();
-      if (isLanguageSupported(baseLang)) {
+      if (checkSupportForInit(baseLang)) {
         return baseLang;
       }
     }
     
-    if (isLanguageSupported('en')) return 'en'; // Default to English
+    if (checkSupportForInit('en')) return 'en'; // Default to English
     return supportedLanguages.length > 0 ? supportedLanguages[0].code : 'en'; // Absolute fallback
   });
 
@@ -76,12 +79,11 @@ export const LanguageProvider = ({
 
   const setLanguage = (langCode: string) => {
     const normalizedLangCode = langCode.toLowerCase();
-    if (isLanguageSupported(normalizedLangCode)) {
+    if (isLanguageSupported(normalizedLangCode)) { // Here, it's fine to call the useCallback version
       setCurrentLanguageState(normalizedLangCode);
       setCookie(COOKIE_NAME, normalizedLangCode);
     } else {
       console.warn(`Unsupported language selected: "${langCode}". Language not changed.`);
-      // Removed toast call for unsupported language
     }
   };
 
