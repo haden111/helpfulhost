@@ -21,7 +21,7 @@ const WELCOME_DEFAULT_TEXTS = {
 };
 
 const FOOTER_DEFAULT_TEXTS = {
-  footerMessage: "If you have further questions, send a message to Haden via the Airbnb app.",
+  footerMessage: "If you have further questions, send a message to Haden via the {airbnbAppLink}.",
 };
 
 
@@ -50,7 +50,7 @@ async function generateTranslations() {
   for (const [locationCode, locationDetails] of Object.entries(appInstructionsData)) {
     allDefaultTexts[`instructions.${locationCode}.title`] = locationDetails.defaultTexts.title;
     locationDetails.defaultTexts.steps.forEach((step, index) => {
-      allDefaultTexts[`instructions.${locationCode}.step.${index}`] = step;
+      allDefaultTexts[`instructions.${locationCode}.step.${index}`] = step.text;
     });
   }
 
@@ -132,3 +132,4 @@ generateTranslations()
     console.error("Unhandled error in generateTranslations script:", error);
     process.exit(1);
   });
+
