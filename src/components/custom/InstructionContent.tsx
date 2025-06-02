@@ -4,37 +4,35 @@
 import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
-import { translateInstructionalText } from '@/ai/flows/translate-instructional-text';
 import type { InstructionLocation, StepInstruction } from '@/lib/instructions-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
+// Removed useToast import
 
 interface InstructionContentProps {
   locationData: InstructionLocation;
 }
 
-interface TranslatedStep extends StepInstruction {
+interface DisplayStep extends StepInstruction {
   // 'text' will be the translated text, other fields from original StepInstruction
 }
 
 export function InstructionContent({ locationData }: InstructionContentProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
 
-  const [translatedTitle, setTranslatedTitle] = useState<string>('');
-  const [translatedSteps, setTranslatedSteps] = useState<TranslatedStep[]>([]);
+  const [displayTitle, setDisplayTitle] = useState<string>('');
+  const [displaySteps, setDisplaySteps] = useState<DisplayStep[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null); // For actual file load errors
 
-  const translateContent = useCallback(async () => {
+  const loadAndTranslateContent = useCallback(async () => {
     setIsLoading(true);
-    setError(null);
+    setFetchError(null);
 
     if (!locationData) {
-      setError("Instruction data is missing.");
+      setFetchError("Instruction data is missing for this location.");
       setIsLoading(false);
       return;
     }
@@ -43,108 +41,82 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
     const defaultSteps = locationData.defaultTexts.steps;
 
     if (!language) {
-      setTranslatedTitle(defaultTitle);
-      setTranslatedSteps(defaultSteps.map(step => ({ ...step })));
+      setDisplayTitle(defaultTitle);
+      setDisplaySteps(defaultSteps.map(step => ({ ...step })));
       setIsLoading(false);
       return;
     }
 
     if (language.toLowerCase() === 'en') {
-      setTranslatedTitle(defaultTitle);
-      setTranslatedSteps(defaultSteps.map(step => ({ ...step })));
+      setDisplayTitle(defaultTitle);
+      setDisplaySteps(defaultSteps.map(step => ({ ...step })));
       setIsLoading(false);
       return;
     }
 
     try {
-      const textsToTranslate: Record<string, string> = {
-        title: defaultTitle,
-      };
-      defaultSteps.forEach((step, index) => {
-        textsToTranslate[`step_${index}_text`] = step.text;
-      });
+      const response = await fetch(`/locales/${language.toLowerCase()}.json`);
+      if (!response.ok) {
+        console.warn(`Could not load translations for ${language} for instruction ${locationData.defaultTexts.title}. Falling back to English.`);
+        setDisplayTitle(defaultTitle);
+        setDisplaySteps(defaultSteps.map(step => ({ ...step })));
+        setIsLoading(false);
+        return;
+      }
+      const translations = await response.json();
+      
+      const locationCode = Object.keys(instructionsData).find(key => instructionsData[key].defaultTexts.title === locationData.defaultTexts.title);
 
-      const result = await translateInstructionalText({
-        textsToTranslate,
-        language: language,
-      });
-
-      const { translatedTexts: R_translatedTexts } = result;
       let newTranslatedTitle = defaultTitle;
-      let titleIsIdenticalToDefault = true;
-
-      if (R_translatedTexts && typeof R_translatedTexts.title === 'string') {
-        newTranslatedTitle = R_translatedTexts.title;
-        if (newTranslatedTitle !== defaultTitle) {
-          titleIsIdenticalToDefault = false;
-        }
+      if (locationCode && translations && typeof translations[`instructions.${locationCode}.title`] === 'string') {
+        newTranslatedTitle = translations[`instructions.${locationCode}.title`];
       } else {
-        console.warn(`InstructionContent: Missing translation for title. Falling back to default.`);
+         // console.warn(`InstructionContent: Missing translation for title key: instructions.${locationCode}.title in ${language}.json. Falling back to default.`);
       }
-      setTranslatedTitle(newTranslatedTitle);
+      setDisplayTitle(newTranslatedTitle);
 
-      let stepsAreCompletelyIdenticalToDefault = true;
-      const tempTranslatedSteps: TranslatedStep[] = defaultSteps.map((originalStep, index) => {
-        const translatedText = R_translatedTexts?.[`step_${index}_text`];
-        if (translatedText && typeof translatedText === 'string') {
-          if (translatedText !== originalStep.text) {
-            stepsAreCompletelyIdenticalToDefault = false;
-          }
-          return { ...originalStep, text: translatedText };
+      const tempTranslatedSteps: DisplayStep[] = defaultSteps.map((originalStep, index) => {
+        let translatedText = originalStep.text; // Default to original English text
+        if (locationCode && translations && typeof translations[`instructions.${locationCode}.step.${index}`] === 'string') {
+          translatedText = translations[`instructions.${locationCode}.step.${index}`];
         } else {
-          console.warn(`InstructionContent: Missing translation for step_${index}_text. Falling back to default.`);
-          return { ...originalStep }; 
+          // console.warn(`InstructionContent: Missing translation for step key: instructions.${locationCode}.step.${index} in ${language}.json. Falling back to default for this step.`);
         }
+        return { ...originalStep, text: translatedText };
       });
-      setTranslatedSteps(tempTranslatedSteps);
-
-      if (titleIsIdenticalToDefault && stepsAreCompletelyIdenticalToDefault && language.toLowerCase() !== 'en') {
-        console.warn(`InstructionContent: Received translations for language '${language}' are identical to English defaults for "${defaultTitle}". Upstream fallback likely occurred.`);
-        toast({
-          title: 'Translation May Be Incomplete (Instructions)',
-          description: `Displaying content in English as translation to ${language} for "${defaultTitle}" might not have been fully successful.`,
-          variant: 'default',
-          duration: 7000,
-        });
-      }
+      setDisplaySteps(tempTranslatedSteps);
 
     } catch (e) {
-      console.error('Translation error in InstructionContent:', e);
-      setError(`Failed to translate content for "${defaultTitle}". Displaying in English.`);
-      toast({
-        title: `Translation Failed (${defaultTitle})`,
-        description: 'Could not translate instructions. Showing default language.',
-        variant: 'destructive',
-        duration: 7000,
-      });
-      setTranslatedTitle(defaultTitle);
-      setTranslatedSteps(defaultSteps.map(step => ({ ...step })));
+      console.error('Translation fetch error in InstructionContent:', e);
+      setFetchError(`Failed to load translations for "${defaultTitle}". Displaying in English.`);
+      setDisplayTitle(defaultTitle);
+      setDisplaySteps(defaultSteps.map(step => ({ ...step })));
     } finally {
       setIsLoading(false);
     }
-  }, [language, locationData, toast]);
+  }, [language, locationData]);
 
   useEffect(() => {
     if (locationData) {
-      translateContent();
+      loadAndTranslateContent();
     } else {
       setIsLoading(false);
-      setError("Instruction data is not available.");
+      setFetchError("Instruction data is not available for this page.");
     }
-  }, [translateContent, locationData]);
+  }, [loadAndTranslateContent, locationData]);
 
   if (!locationData && !isLoading) {
     return (
       <Alert variant="destructive" className="my-4">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>Instruction data is missing and content cannot be displayed.</AlertDescription>
+        <AlertDescription>{fetchError || "Instruction data is missing and content cannot be displayed."}</AlertDescription>
       </Alert>
     );
   }
 
-  const currentTitle = translatedTitle || locationData?.defaultTexts?.title;
-  const currentSteps = (translatedSteps.length > 0 ? translatedSteps : (locationData?.defaultTexts?.steps.map(step => ({ ...step }))) || []);
+  const currentTitle = displayTitle || locationData?.defaultTexts?.title;
+  const currentSteps = (displaySteps.length > 0 ? displaySteps : (locationData?.defaultTexts?.steps.map(step => ({ ...step }))) || []);
 
 
   return (
@@ -174,11 +146,11 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
           </div>
         )}
 
-        {error && !isLoading && (
+        {fetchError && !isLoading && ( // Display general fetch error
           <Alert variant="destructive" className="my-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Translation Issue</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertTitle>Loading Issue</AlertTitle>
+            <AlertDescription>{fetchError}</AlertDescription>
           </Alert>
         )}
 
@@ -186,7 +158,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
           <div className="space-y-4 sm:space-y-6">
             {[1, 2].map(i => (
               <div key={i} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-background rounded-lg border border-border/50 shadow-sm">
-                <div className="w-2/5 sm:w-1/3 flex-shrink-0">
+                 <div className="w-2/5 sm:w-1/3 flex-shrink-0">
                   <Skeleton className="aspect-[370/500] w-full rounded-lg" />
                 </div>
                 <div className="w-3/5 sm:w-2/3 flex items-center">
@@ -202,7 +174,6 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
           <div className="space-y-4 sm:space-y-6">
             {currentSteps.map((step, index) => (
               <div key={index} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-card rounded-lg border border-border/30 shadow-md hover:shadow-lg transition-shadow duration-300">
-                {/* Image Cell */}
                 <div className="w-2/5 sm:w-1/3 flex-shrink-0">
                   <div className="relative aspect-[370/500] w-full rounded-lg overflow-hidden shadow-sm group-hover:shadow-md">
                     <Image
@@ -215,7 +186,6 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                     />
                   </div>
                 </div>
-                {/* Text Cell */}
                 <div className="w-3/5 sm:w-2/3 flex items-center py-1 sm:py-2">
                   <p className="text-sm sm:text-base text-foreground/90 leading-relaxed">
                     <span className="font-semibold text-primary">{index + 1}. </span>{step.text}
@@ -223,11 +193,11 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                 </div>
               </div>
             ))}
-            {currentSteps.length === 0 && !error && !isLoading && locationData?.defaultTexts?.steps?.length > 0 && (
+            {currentSteps.length === 0 && !fetchError && !isLoading && locationData?.defaultTexts?.steps?.length > 0 && (
               <Alert>
                 <Info className="h-4 w-4" />
-                <AlertTitle>Instructions Loading</AlertTitle>
-                <AlertDescription>Translated steps will appear here shortly.</AlertDescription>
+                <AlertTitle>Instructions Ready</AlertTitle>
+                <AlertDescription>Text will appear here shortly.</AlertDescription>
               </Alert>
             )}
             {currentSteps.length === 0 && locationData?.defaultTexts?.steps?.length === 0 && !isLoading && (
@@ -243,4 +213,3 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
     </Card>
   );
 }
-

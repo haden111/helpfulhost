@@ -4,7 +4,7 @@
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supportedLanguages, type Language } from '@/lib/languages';
-import { useToast } from '@/hooks/use-toast';
+// Removed useToast import
 
 const COOKIE_NAME = 'hadens-helpful-host-lang';
 
@@ -43,7 +43,7 @@ export const LanguageProvider = ({
   children: ReactNode;
   initialDetectedLanguage: string | null;
 }) => {
-  const { toast } = useToast();
+  // Removed toast instance
 
   const isLanguageSupported = useCallback((langCode: string): boolean => {
     return supportedLanguages.some(l => l.code.toLowerCase() === langCode.toLowerCase());
@@ -80,11 +80,8 @@ export const LanguageProvider = ({
       setCurrentLanguageState(normalizedLangCode);
       setCookie(COOKIE_NAME, normalizedLangCode);
     } else {
-      toast({
-        title: "Unsupported Language",
-        description: `The language "${langCode}" is not supported.`,
-        variant: "destructive",
-      });
+      console.warn(`Unsupported language selected: "${langCode}". Language not changed.`);
+      // Removed toast call for unsupported language
     }
   };
 
