@@ -159,9 +159,9 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
           </CardTitle>
         )}
       </CardHeader>
-      <CardContent className="p-4 md:p-6 space-y-6">
+      <CardContent className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
         {locationData?.image && (
-          <div className="mb-6 rounded-lg overflow-hidden shadow-md">
+          <div className="mb-4 sm:mb-6 rounded-lg overflow-hidden shadow-md">
             <Image
               src={locationData.image}
               alt={currentTitle || 'Location image'}
@@ -183,42 +183,41 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         )}
 
         {isLoading && currentSteps.length === 0 ? (
-          <div className="space-y-8">
+          <div className="space-y-4 sm:space-y-6">
             {[1, 2].map(i => (
-              <div key={i} className="flex flex-col md:flex-row gap-4 md:gap-6 items-stretch p-4 bg-background rounded-lg border border-border/50 shadow-sm">
-                <div className="w-full md:w-1/3 lg:w-1/4 flex-shrink-0">
+              <div key={i} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-background rounded-lg border border-border/50 shadow-sm">
+                <div className="w-2/5 sm:w-1/3 flex-shrink-0">
                   <Skeleton className="aspect-[370/500] w-full rounded-lg" />
                 </div>
-                <div className="w-full md:w-2/3 lg:w-3/4 flex items-center">
+                <div className="w-3/5 sm:w-2/3 flex items-center">
                   <div className="space-y-2 w-full">
-                    <Skeleton className="h-6 w-full" />
-                    <Skeleton className="h-6 w-5/6" />
+                    <Skeleton className="h-5 sm:h-6 w-full" />
+                    <Skeleton className="h-5 sm:h-6 w-5/6" />
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-4 sm:space-y-6">
             {currentSteps.map((step, index) => (
-              <div key={index} className="flex flex-col md:flex-row gap-4 md:gap-6 items-stretch p-4 bg-card rounded-lg border border-border/30 shadow-md hover:shadow-lg transition-shadow duration-300">
+              <div key={index} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-card rounded-lg border border-border/30 shadow-md hover:shadow-lg transition-shadow duration-300">
                 {/* Image Cell */}
-                <div className="w-full md:w-1/3 lg:w-1/4 flex-shrink-0 self-center md:self-auto"> {/* Centered image on mobile */}
-                  <div className="relative aspect-[370/500] w-full max-w-[200px] md:max-w-none mx-auto md:mx-0 rounded-lg overflow-hidden shadow-md group-hover:shadow-lg">
+                <div className="w-2/5 sm:w-1/3 flex-shrink-0">
+                  <div className="relative aspect-[370/500] w-full rounded-lg overflow-hidden shadow-sm group-hover:shadow-md">
                     <Image
                       src={step.image || `https://placehold.co/370x500.png`}
                       alt={step.text.substring(0, 50) + '...' || `Instruction step ${index + 1}`}
                       fill
-                      objectFit="cover"
-                      sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                      className="transition-transform duration-300 group-hover:scale-105"
+                      sizes="(max-width: 639px) 40vw, 33vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
                       data-ai-hint={step.dataAiHint}
                     />
                   </div>
                 </div>
                 {/* Text Cell */}
-                <div className="w-full md:w-2/3 lg:w-3/4 flex items-center py-2">
-                  <p className="text-base text-foreground/90 leading-relaxed">
+                <div className="w-3/5 sm:w-2/3 flex items-center py-1 sm:py-2">
+                  <p className="text-sm sm:text-base text-foreground/90 leading-relaxed">
                     <span className="font-semibold text-primary">{index + 1}. </span>{step.text}
                   </p>
                 </div>
@@ -244,3 +243,4 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
     </Card>
   );
 }
+
