@@ -44,14 +44,14 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
 
     if (!language) {
       setTranslatedTitle(defaultTitle);
-      setTranslatedSteps(defaultSteps);
+      setTranslatedSteps(defaultSteps.map(step => ({ ...step })));
       setIsLoading(false);
       return;
     }
 
     if (language.toLowerCase() === 'en') {
       setTranslatedTitle(defaultTitle);
-      setTranslatedSteps(defaultSteps);
+      setTranslatedSteps(defaultSteps.map(step => ({ ...step })));
       setIsLoading(false);
       return;
     }
@@ -93,7 +93,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
           return { ...originalStep, text: translatedText };
         } else {
           console.warn(`InstructionContent: Missing translation for step_${index}_text. Falling back to default.`);
-          return { ...originalStep }; // Fallback for this specific step's text
+          return { ...originalStep }; 
         }
       });
       setTranslatedSteps(tempTranslatedSteps);
@@ -118,7 +118,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         duration: 7000,
       });
       setTranslatedTitle(defaultTitle);
-      setTranslatedSteps(defaultSteps);
+      setTranslatedSteps(defaultSteps.map(step => ({ ...step })));
     } finally {
       setIsLoading(false);
     }
@@ -144,7 +144,8 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
   }
 
   const currentTitle = translatedTitle || locationData?.defaultTexts?.title;
-  const currentSteps = (translatedSteps.length > 0 ? translatedSteps : locationData?.defaultTexts?.steps) || [];
+  const currentSteps = (translatedSteps.length > 0 ? translatedSteps : (locationData?.defaultTexts?.steps.map(step => ({ ...step }))) || []);
+
 
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-xl overflow-hidden">
@@ -159,7 +160,6 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         )}
       </CardHeader>
       <CardContent className="p-4 md:p-6 space-y-6">
-        {/* Main Location Image */}
         {locationData?.image && (
           <div className="mb-6 rounded-lg overflow-hidden shadow-md">
             <Image
@@ -185,11 +185,15 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         {isLoading && currentSteps.length === 0 ? (
           <div className="space-y-8">
             {[1, 2].map(i => (
-              <div key={i} className="flex flex-col md:flex-row gap-4 items-start">
-                <Skeleton className="w-full md:w-1/3 h-40 rounded-md" />
-                <div className="w-full md:w-2/3 space-y-2">
-                  <Skeleton className="h-6 w-full" />
-                  <Skeleton className="h-6 w-5/6" />
+              <div key={i} className="flex flex-col md:flex-row gap-4 md:gap-6 items-stretch p-4 bg-background rounded-lg border border-border/50 shadow-sm">
+                <div className="w-full md:w-1/3 lg:w-1/4 flex-shrink-0">
+                  <Skeleton className="aspect-[370/500] w-full rounded-lg" />
+                </div>
+                <div className="w-full md:w-2/3 lg:w-3/4 flex items-center">
+                  <div className="space-y-2 w-full">
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-5/6" />
+                  </div>
                 </div>
               </div>
             ))}
@@ -197,20 +201,26 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         ) : (
           <div className="space-y-8">
             {currentSteps.map((step, index) => (
-              <div key={index} className="flex flex-col md:flex-row gap-4 md:gap-6 items-start p-4 bg-background rounded-lg border border-border/50 shadow-sm">
-                <div className="w-full md:w-1/3 flex-shrink-0">
-                  <div className="aspect-[3/2] relative rounded-md overflow-hidden">
+              <div key={index} className="flex flex-col md:flex-row gap-4 md:gap-6 items-stretch p-4 bg-card rounded-lg border border-border/30 shadow-md hover:shadow-lg transition-shadow duration-300">
+                {/* Image Cell */}
+                <div className="w-full md:w-1/3 lg:w-1/4 flex-shrink-0 self-center md:self-auto"> {/* Centered image on mobile */}
+                  <div className="relative aspect-[370/500] w-full max-w-[200px] md:max-w-none mx-auto md:mx-0 rounded-lg overflow-hidden shadow-md group-hover:shadow-lg">
                     <Image
-                      src={step.image || 'https://placehold.co/300x200.png'}
-                      alt={step.text.substring(0, 30) + '...' || `Instruction step ${index + 1}`}
-                      layout="fill"
+                      src={step.image || `https://placehold.co/370x500.png`}
+                      alt={step.text.substring(0, 50) + '...' || `Instruction step ${index + 1}`}
+                      fill
                       objectFit="cover"
+                      sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
+                      className="transition-transform duration-300 group-hover:scale-105"
                       data-ai-hint={step.dataAiHint}
                     />
                   </div>
                 </div>
-                <div className="flex-grow">
-                  <p className="text-base text-foreground/90 leading-relaxed">{index + 1}. {step.text}</p>
+                {/* Text Cell */}
+                <div className="w-full md:w-2/3 lg:w-3/4 flex items-center py-2">
+                  <p className="text-base text-foreground/90 leading-relaxed">
+                    <span className="font-semibold text-primary">{index + 1}. </span>{step.text}
+                  </p>
                 </div>
               </div>
             ))}
