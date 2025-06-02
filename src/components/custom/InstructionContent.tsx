@@ -4,12 +4,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
-import type { InstructionLocation, StepInstruction } from '@/lib/instructions-data';
+import type { InstructionLocation, StepInstruction } from '@/lib/instructions-data'; // Ensure StepInstruction includes textColor
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { cn } from '@/lib/utils'; // Import cn utility
+import { cn } from '@/lib/utils';
 
 interface InstructionContentProps {
   locationData: InstructionLocation;
@@ -19,12 +19,9 @@ interface DisplayStep extends StepInstruction {
   // 'text' will be the translated text, other fields from original StepInstruction
 }
 
-// Helper to find locationCode if needed for translations (if your translation keys depend on it)
-// This is a simplified version; in a real app, you might pass locationCode or have a more robust mapping.
 const getLocationCodeFromTitle = (title: string, data: Record<string, InstructionLocation>): string | undefined => {
   return Object.keys(data).find(key => data[key].defaultTexts.title === title);
 };
-
 
 export function InstructionContent({ locationData }: InstructionContentProps) {
   const { language } = useLanguage();
@@ -72,12 +69,8 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
       }
       const translations = await response.json();
       
-      // Assuming instructionsData is available in this scope or passed/imported
-      // For this example, let's assume it's globally accessible or re-imported if necessary.
-      // For a cleaner approach, pass instructionData or the specific locationCode.
-      // const instructionsData = (await import('@/lib/instructions-data')).instructionsData; // Example of dynamic import if needed
-      const locationCode = getLocationCodeFromTitle(locationData.defaultTexts.title, (await import('@/lib/instructions-data')).instructionsData);
-
+      const instructionsDataModule = await import('@/lib/instructions-data');
+      const locationCode = getLocationCodeFromTitle(locationData.defaultTexts.title, instructionsDataModule.instructionsData);
 
       let newTranslatedTitle = defaultTitle;
       if (locationCode && translations && typeof translations[`instructions.${locationCode}.title`] === 'string') {
@@ -90,7 +83,8 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         if (locationCode && translations && typeof translations[`instructions.${locationCode}.step.${index}`] === 'string') {
           translatedText = translations[`instructions.${locationCode}.step.${index}`];
         }
-        return { ...originalStep, text: translatedText, textColor: originalStep.textColor }; // Ensure textColor is carried over
+        // Carry over all original properties, including image, dataAiHint, and textColor
+        return { ...originalStep, text: translatedText };
       });
       setDisplaySteps(tempTranslatedSteps);
 
@@ -126,7 +120,6 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
   const currentTitle = displayTitle || locationData?.defaultTexts?.title;
   const currentSteps = (displaySteps.length > 0 ? displaySteps : (locationData?.defaultTexts?.steps.map(step => ({ ...step }))) || []);
 
-
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-xl overflow-hidden">
       <CardHeader className="bg-muted/50 p-4 md:p-6">
@@ -139,7 +132,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
           </CardTitle>
         )}
       </CardHeader>
-      <CardContent className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+      <CardContent className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4">
         {locationData?.image && (
           <div className="mb-4 sm:mb-6 rounded-lg overflow-hidden shadow-md">
             <Image
@@ -165,11 +158,13 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         {isLoading && currentSteps.length === 0 ? (
           <div className="space-y-3 sm:space-y-4">
             {[1, 2].map(i => (
-              <div key={i} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-background rounded-lg border border-border/50 shadow-sm">
-                 <div className="w-2/5 sm:w-1/3 flex-shrink-0">
-                  <Skeleton className="aspect-[370/500] w-full rounded-lg" />
+              <div key={i} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-card rounded-lg border border-border/30 shadow-md">
+                <div className="w-2/5 sm:w-1/3 flex-shrink-0">
+                  <div className="relative aspect-[370/500] w-full rounded-lg overflow-hidden shadow-sm">
+                    <Skeleton className="w-full h-full" />
+                  </div>
                 </div>
-                <div className="w-3/5 sm:w-2/3 flex items-center">
+                <div className="w-3/5 sm:w-2/3 flex items-center py-1 sm:py-2">
                   <div className="space-y-2 w-full">
                     <Skeleton className="h-5 sm:h-6 w-full" />
                     <Skeleton className="h-5 sm:h-6 w-5/6" />
@@ -182,25 +177,26 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
           <div className="space-y-3 sm:space-y-4">
             {currentSteps.map((step, index) => (
               <div key={index} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-card rounded-lg border border-border/30 shadow-md hover:shadow-lg transition-shadow duration-300">
-                <div className="w-2/5 sm:w-1/3 flex-shrink-0"> {/* Image container takes less space on small screens */}
+                <div className="w-2/5 sm:w-1/3 flex-shrink-0">
                   <div className="relative aspect-[370/500] w-full rounded-lg overflow-hidden shadow-sm group-hover:shadow-md">
                     <Image
                       src={step.image || `https://placehold.co/370x500.png`}
                       alt={step.text.substring(0, 50) + '...' || `Instruction step ${index + 1}`}
                       fill
-                      sizes="(max-width: 639px) 40vw, 33vw"
+                      sizes="(max-width: 639px) 40vw, (max-width: 767px) 40vw, 33vw"
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                       data-ai-hint={step.dataAiHint}
                     />
                   </div>
                 </div>
-                <div className="w-3/5 sm:w-2/3 flex items-center py-1 sm:py-2"> {/* Text container takes more space */}
+                <div className="w-3/5 sm:w-2/3 flex items-center py-1 sm:py-2 pl-1 sm:pl-2"> {/* Added pl for a bit of space */}
                   <p className={cn(
                       "text-sm sm:text-base text-foreground/90 leading-relaxed",
                       step.textColor === 'green' && "text-green-600",
                       step.textColor === 'red' && "text-destructive"
                     )}>
-                    <span className="font-semibold text-primary">{index + 1}. </span>{step.text}
+                    {/* Numbering removed: <span className="font-semibold text-primary">{index + 1}. </span> */}
+                    {step.text}
                   </p>
                 </div>
               </div>
