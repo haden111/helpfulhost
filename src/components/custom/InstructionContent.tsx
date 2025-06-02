@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import { translateInstructionalText } from '@/ai/flows/translate-instructional-text';
-import type { InstructionLocation } from '@/lib/instructions-data';
+import type { InstructionLocation, StepInstruction } from '@/lib/instructions-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, Info } from 'lucide-react';
@@ -16,12 +16,16 @@ interface InstructionContentProps {
   locationData: InstructionLocation;
 }
 
+interface TranslatedStep extends StepInstruction {
+  // 'text' will be the translated text, other fields from original StepInstruction
+}
+
 export function InstructionContent({ locationData }: InstructionContentProps) {
   const { language } = useLanguage();
   const { toast } = useToast();
 
   const [translatedTitle, setTranslatedTitle] = useState<string>('');
-  const [translatedSteps, setTranslatedSteps] = useState<string[]>([]);
+  const [translatedSteps, setTranslatedSteps] = useState<TranslatedStep[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,32 +34,34 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
     setError(null);
 
     if (!locationData) {
-        setError("Instruction data is missing.");
-        setIsLoading(false);
-        return;
+      setError("Instruction data is missing.");
+      setIsLoading(false);
+      return;
     }
-    
+
+    const defaultTitle = locationData.defaultTexts.title;
+    const defaultSteps = locationData.defaultTexts.steps;
+
     if (!language) {
-        // This case should ideally be handled by the language context providing a default
-        setTranslatedTitle(locationData.defaultTexts.title);
-        setTranslatedSteps(locationData.defaultTexts.steps);
-        setIsLoading(false);
-        return;
+      setTranslatedTitle(defaultTitle);
+      setTranslatedSteps(defaultSteps);
+      setIsLoading(false);
+      return;
     }
 
     if (language.toLowerCase() === 'en') {
-      setTranslatedTitle(locationData.defaultTexts.title);
-      setTranslatedSteps(locationData.defaultTexts.steps);
+      setTranslatedTitle(defaultTitle);
+      setTranslatedSteps(defaultSteps);
       setIsLoading(false);
       return;
     }
 
     try {
       const textsToTranslate: Record<string, string> = {
-        title: locationData.defaultTexts.title,
+        title: defaultTitle,
       };
-      locationData.defaultTexts.steps.forEach((step, index) => {
-        textsToTranslate[`step_${index}`] = step;
+      defaultSteps.forEach((step, index) => {
+        textsToTranslate[`step_${index}_text`] = step.text;
       });
 
       const result = await translateInstructionalText({
@@ -63,15 +69,13 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         language: language,
       });
 
-      const { translatedTexts: R_translatedTexts } = result; // Renamed to avoid confusion
-      let newTranslatedTitle = locationData.defaultTexts.title;
-      let newTranslatedSteps: string[] = [...locationData.defaultTexts.steps];
+      const { translatedTexts: R_translatedTexts } = result;
+      let newTranslatedTitle = defaultTitle;
       let titleIsIdenticalToDefault = true;
-      let stepsAreIdenticalToDefault = true;
 
       if (R_translatedTexts && typeof R_translatedTexts.title === 'string') {
         newTranslatedTitle = R_translatedTexts.title;
-        if (R_translatedTexts.title !== locationData.defaultTexts.title) {
+        if (newTranslatedTitle !== defaultTitle) {
           titleIsIdenticalToDefault = false;
         }
       } else {
@@ -79,135 +83,153 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
       }
       setTranslatedTitle(newTranslatedTitle);
 
-      const tempTranslatedSteps: string[] = [];
-      locationData.defaultTexts.steps.forEach((defaultStep, index) => {
-        if (R_translatedTexts && typeof R_translatedTexts[`step_${index}`] === 'string') {
-          tempTranslatedSteps.push(R_translatedTexts[`step_${index}`]);
-          if (R_translatedTexts[`step_${index}`] !== defaultStep) {
-            stepsAreIdenticalToDefault = false;
+      let stepsAreCompletelyIdenticalToDefault = true;
+      const tempTranslatedSteps: TranslatedStep[] = defaultSteps.map((originalStep, index) => {
+        const translatedText = R_translatedTexts?.[`step_${index}_text`];
+        if (translatedText && typeof translatedText === 'string') {
+          if (translatedText !== originalStep.text) {
+            stepsAreCompletelyIdenticalToDefault = false;
           }
+          return { ...originalStep, text: translatedText };
         } else {
-          console.warn(`InstructionContent: Missing translation for step_${index}. Falling back to default.`);
-          tempTranslatedSteps.push(defaultStep); // Fallback for this specific step
+          console.warn(`InstructionContent: Missing translation for step_${index}_text. Falling back to default.`);
+          return { ...originalStep }; // Fallback for this specific step's text
         }
       });
       setTranslatedSteps(tempTranslatedSteps);
-      newTranslatedSteps = tempTranslatedSteps;
 
-
-      if ((titleIsIdenticalToDefault && stepsAreIdenticalToDefault) && language.toLowerCase() !== 'en') {
-        console.warn(`InstructionContent: Received translations for language '${language}' are identical to English defaults for "${locationData.defaultTexts.title}". Upstream fallback likely occurred.`);
+      if (titleIsIdenticalToDefault && stepsAreCompletelyIdenticalToDefault && language.toLowerCase() !== 'en') {
+        console.warn(`InstructionContent: Received translations for language '${language}' are identical to English defaults for "${defaultTitle}". Upstream fallback likely occurred.`);
         toast({
-            title: 'Translation May Be Incomplete (Instructions)',
-            description: `Displaying content in English as translation to ${language} for "${locationData.defaultTexts.title}" might not have been fully successful.`,
-            variant: 'default',
-            duration: 7000,
+          title: 'Translation May Be Incomplete (Instructions)',
+          description: `Displaying content in English as translation to ${language} for "${defaultTitle}" might not have been fully successful.`,
+          variant: 'default',
+          duration: 7000,
         });
       }
 
     } catch (e) {
       console.error('Translation error in InstructionContent:', e);
-      setError(`Failed to translate content for "${locationData.defaultTexts.title}". Displaying in English.`);
+      setError(`Failed to translate content for "${defaultTitle}". Displaying in English.`);
       toast({
-        title: `Translation Failed (${locationData.defaultTexts.title})`,
+        title: `Translation Failed (${defaultTitle})`,
         description: 'Could not translate instructions. Showing default language.',
         variant: 'destructive',
-        duration: 7000, 
+        duration: 7000,
       });
-      setTranslatedTitle(locationData.defaultTexts.title);
-      setTranslatedSteps(locationData.defaultTexts.steps);
+      setTranslatedTitle(defaultTitle);
+      setTranslatedSteps(defaultSteps);
     } finally {
       setIsLoading(false);
     }
   }, [language, locationData, toast]);
 
   useEffect(() => {
-    if (locationData) { // Ensure locationData is available before translating
-        translateContent();
+    if (locationData) {
+      translateContent();
     } else {
-        setIsLoading(false);
-        setError("Instruction data is not available.");
+      setIsLoading(false);
+      setError("Instruction data is not available.");
     }
   }, [translateContent, locationData]);
 
   if (!locationData && !isLoading) {
     return (
-         <Alert variant="destructive" className="my-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>Instruction data is missing and content cannot be displayed.</AlertDescription>
-        </Alert>
+      <Alert variant="destructive" className="my-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>Instruction data is missing and content cannot be displayed.</AlertDescription>
+      </Alert>
     );
   }
+
+  const currentTitle = translatedTitle || locationData?.defaultTexts?.title;
+  const currentSteps = (translatedSteps.length > 0 ? translatedSteps : locationData?.defaultTexts?.steps) || [];
 
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-xl overflow-hidden">
       <CardHeader className="bg-muted/50 p-4 md:p-6">
-        {isLoading ? (
+        {isLoading && !currentTitle ? (
           <Skeleton className="h-8 w-3/4" />
         ) : (
           <CardTitle className="text-2xl md:text-3xl font-semibold text-primary flex items-center gap-2">
             <Info className="h-7 w-7 text-primary" />
-            {translatedTitle || locationData?.defaultTexts?.title}
+            {currentTitle}
           </CardTitle>
         )}
       </CardHeader>
-      <CardContent className="p-0">
-        <div className="flex flex-col md:flex-row">
-          <div className="w-full md:w-1/2 relative aspect-[4/3] md:aspect-auto">
-            {locationData?.image && (
-              <Image
-                src={locationData.image}
-                alt={translatedTitle || locationData.defaultTexts.title}
-                layout="fill"
-                objectFit="cover"
-                data-ai-hint={locationData.dataAiHint}
-                priority
-              />
-            )}
+      <CardContent className="p-4 md:p-6 space-y-6">
+        {/* Main Location Image */}
+        {locationData?.image && (
+          <div className="mb-6 rounded-lg overflow-hidden shadow-md">
+            <Image
+              src={locationData.image}
+              alt={currentTitle || 'Location image'}
+              width={800}
+              height={450}
+              className="w-full h-auto object-cover"
+              data-ai-hint={locationData.dataAiHint}
+              priority
+            />
           </div>
-          <div className="w-full md:w-1/2 p-4 md:p-6 space-y-4">
-            {error && !isLoading && ( 
-              <Alert variant="destructive" className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Translation Issue</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
+        )}
+
+        {error && !isLoading && (
+          <Alert variant="destructive" className="my-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Translation Issue</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {isLoading && currentSteps.length === 0 ? (
+          <div className="space-y-8">
+            {[1, 2].map(i => (
+              <div key={i} className="flex flex-col md:flex-row gap-4 items-start">
+                <Skeleton className="w-full md:w-1/3 h-40 rounded-md" />
+                <div className="w-full md:w-2/3 space-y-2">
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-6 w-5/6" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {currentSteps.map((step, index) => (
+              <div key={index} className="flex flex-col md:flex-row gap-4 md:gap-6 items-start p-4 bg-background rounded-lg border border-border/50 shadow-sm">
+                <div className="w-full md:w-1/3 flex-shrink-0">
+                  <div className="aspect-[3/2] relative rounded-md overflow-hidden">
+                    <Image
+                      src={step.image || 'https://placehold.co/300x200.png'}
+                      alt={step.text.substring(0, 30) + '...' || `Instruction step ${index + 1}`}
+                      layout="fill"
+                      objectFit="cover"
+                      data-ai-hint={step.dataAiHint}
+                    />
+                  </div>
+                </div>
+                <div className="flex-grow">
+                  <p className="text-base text-foreground/90 leading-relaxed">{index + 1}. {step.text}</p>
+                </div>
+              </div>
+            ))}
+            {currentSteps.length === 0 && !error && !isLoading && locationData?.defaultTexts?.steps?.length > 0 && (
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>Instructions Loading</AlertTitle>
+                <AlertDescription>Translated steps will appear here shortly.</AlertDescription>
               </Alert>
             )}
-            {isLoading ? (
-              <div className="space-y-3">
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-5/6" />
-                <Skeleton className="h-6 w-full" />
-              </div>
-            ) : (
-              <ul className="list-none space-y-3 text-foreground/90">
-                {translatedSteps.map((step, index) => (
-                  <li key={index} className="flex items-start gap-3 p-2 bg-background rounded-md border border-border/50">
-                    <span className="flex-shrink-0 h-6 w-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-semibold">
-                      {index + 1}
-                    </span>
-                    <span className="text-base">{step}</span>
-                  </li>
-                ))}
-                {translatedSteps.length === 0 && !error && !isLoading && locationData?.defaultTexts?.steps?.length > 0 && (
-                   <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertTitle>Instructions Loading</AlertTitle>
-                    <AlertDescription>Translated steps will appear here shortly.</AlertDescription>
-                  </Alert>
-                )}
-                 {translatedSteps.length === 0 && locationData?.defaultTexts?.steps?.length === 0 && !isLoading && (
-                  <Alert variant="default">
-                    <Info className="h-4 w-4" />
-                    <AlertTitle>No Instructions</AlertTitle>
-                    <AlertDescription>There are currently no detailed steps for this item.</AlertDescription>
-                  </Alert>
-                )}
-              </ul>
+            {currentSteps.length === 0 && locationData?.defaultTexts?.steps?.length === 0 && !isLoading && (
+              <Alert variant="default">
+                <Info className="h-4 w-4" />
+                <AlertTitle>No Instructions</AlertTitle>
+                <AlertDescription>There are currently no detailed steps for this item.</AlertDescription>
+              </Alert>
             )}
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
