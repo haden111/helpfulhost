@@ -3,6 +3,7 @@ export interface StepInstruction {
   text: string;
   image: string; // URL for the step-specific image
   dataAiHint: string; // AI hint for the step-specific image
+  textColor?: 'green' | 'red'; // Optional: for green or red text
 }
 
 export interface InstructionLocation {
@@ -17,17 +18,19 @@ export interface InstructionLocation {
 export const instructionsData: Record<string, InstructionLocation> = {
   "front-door": {
     defaultTexts: {
-      title: "Front Door Instructions",
+      title: "Front Door Instructions 🔑", // Example Emoji
       steps: [
         {
           text: "To unlock the door, enter the code: 1234.",
           image: "https://placehold.co/370x500.png",
           dataAiHint: "keypad door",
+          textColor: "green", // Example Green Text
         },
         {
-          text: "To lock the door, press the Schlage button once.",
+          text: "To lock the door, press the Schlage button once. ❗Ensure it's fully locked.",
           image: "https://placehold.co/370x500.png",
           dataAiHint: "door lock",
+          textColor: "red", // Example Red Text
         },
       ],
     },
@@ -36,22 +39,23 @@ export const instructionsData: Record<string, InstructionLocation> = {
   },
   "living-room-tv": {
     defaultTexts: {
-      title: "Living Room TV Instructions",
+      title: "Living Room TV Instructions 🎦",
       steps: [
         {
-          text: "Use the top-left button on the main TV remote to turn the TV on/off.",
+          text: "1️⃣ Use the top-left button on the main TV remote to turn the TV on/off.",
           image: "https://placehold.co/370x500.png",
           dataAiHint: "tv remote",
         },
         {
-          text: "The 'Source' button on the main TV remote changes input (HDMI1 for Apple TV, HDMI2 for Chromecast).",
+          text: "2️⃣ The 'Source' button on the main TV remote changes input (HDMI1 for Apple TV, HDMI2 for Chromecast).",
           image: "https://placehold.co/370x500.png",
           dataAiHint: "remote source",
         },
         {
-          text: "Volume controls are on the main TV remote. The Apple TV remote controls the Apple TV interface.",
+          text: "3️⃣ Volume controls are on the main TV remote. ✅ The Apple TV remote controls the Apple TV interface.",
           image: "https://placehold.co/370x500.png",
           dataAiHint: "apple tv",
+          textColor: "green",
         },
       ],
     },
@@ -60,10 +64,10 @@ export const instructionsData: Record<string, InstructionLocation> = {
   },
   "kitchen-coffee-machine": {
     defaultTexts: {
-      title: "Kitchen Coffee Machine Instructions",
+      title: "Kitchen Coffee Machine Instructions ☕",
       steps: [
         {
-          text: "Ensure the water tank at the back is filled with fresh water.",
+          text: "Ensure the water tank at the back is filled with fresh water. 🚰",
           image: "https://placehold.co/370x500.png",
           dataAiHint: "water tank",
         },
@@ -77,6 +81,12 @@ export const instructionsData: Record<string, InstructionLocation> = {
           image: "https://placehold.co/370x500.png",
           dataAiHint: "brew button",
         },
+        {
+          text: "⛔ Do not open the handle during brewing cycle.",
+          image: "https://placehold.co/370x500.png",
+          dataAiHint: "warning sign",
+          textColor: "red",
+        }
       ],
     },
     image: "https://placehold.co/800x450.png",

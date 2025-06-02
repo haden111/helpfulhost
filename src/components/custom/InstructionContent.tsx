@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-// Removed useToast import
+import { cn } from '@/lib/utils'; // Import cn utility
 
 interface InstructionContentProps {
   locationData: InstructionLocation;
@@ -19,13 +19,20 @@ interface DisplayStep extends StepInstruction {
   // 'text' will be the translated text, other fields from original StepInstruction
 }
 
+// Helper to find locationCode if needed for translations (if your translation keys depend on it)
+// This is a simplified version; in a real app, you might pass locationCode or have a more robust mapping.
+const getLocationCodeFromTitle = (title: string, data: Record<string, InstructionLocation>): string | undefined => {
+  return Object.keys(data).find(key => data[key].defaultTexts.title === title);
+};
+
+
 export function InstructionContent({ locationData }: InstructionContentProps) {
   const { language } = useLanguage();
 
   const [displayTitle, setDisplayTitle] = useState<string>('');
   const [displaySteps, setDisplaySteps] = useState<DisplayStep[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [fetchError, setFetchError] = useState<string | null>(null); // For actual file load errors
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const loadAndTranslateContent = useCallback(async () => {
     setIsLoading(true);
@@ -65,24 +72,25 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
       }
       const translations = await response.json();
       
-      const locationCode = Object.keys(instructionsData).find(key => instructionsData[key].defaultTexts.title === locationData.defaultTexts.title);
+      // Assuming instructionsData is available in this scope or passed/imported
+      // For this example, let's assume it's globally accessible or re-imported if necessary.
+      // For a cleaner approach, pass instructionData or the specific locationCode.
+      // const instructionsData = (await import('@/lib/instructions-data')).instructionsData; // Example of dynamic import if needed
+      const locationCode = getLocationCodeFromTitle(locationData.defaultTexts.title, (await import('@/lib/instructions-data')).instructionsData);
+
 
       let newTranslatedTitle = defaultTitle;
       if (locationCode && translations && typeof translations[`instructions.${locationCode}.title`] === 'string') {
         newTranslatedTitle = translations[`instructions.${locationCode}.title`];
-      } else {
-         // console.warn(`InstructionContent: Missing translation for title key: instructions.${locationCode}.title in ${language}.json. Falling back to default.`);
       }
       setDisplayTitle(newTranslatedTitle);
 
       const tempTranslatedSteps: DisplayStep[] = defaultSteps.map((originalStep, index) => {
-        let translatedText = originalStep.text; // Default to original English text
+        let translatedText = originalStep.text;
         if (locationCode && translations && typeof translations[`instructions.${locationCode}.step.${index}`] === 'string') {
           translatedText = translations[`instructions.${locationCode}.step.${index}`];
-        } else {
-          // console.warn(`InstructionContent: Missing translation for step key: instructions.${locationCode}.step.${index} in ${language}.json. Falling back to default for this step.`);
         }
-        return { ...originalStep, text: translatedText };
+        return { ...originalStep, text: translatedText, textColor: originalStep.textColor }; // Ensure textColor is carried over
       });
       setDisplaySteps(tempTranslatedSteps);
 
@@ -146,7 +154,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
           </div>
         )}
 
-        {fetchError && !isLoading && ( // Display general fetch error
+        {fetchError && !isLoading && (
           <Alert variant="destructive" className="my-4">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Loading Issue</AlertTitle>
@@ -155,7 +163,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         )}
 
         {isLoading && currentSteps.length === 0 ? (
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-3 sm:space-y-4">
             {[1, 2].map(i => (
               <div key={i} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-background rounded-lg border border-border/50 shadow-sm">
                  <div className="w-2/5 sm:w-1/3 flex-shrink-0">
@@ -171,10 +179,10 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
             ))}
           </div>
         ) : (
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-3 sm:space-y-4">
             {currentSteps.map((step, index) => (
               <div key={index} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-card rounded-lg border border-border/30 shadow-md hover:shadow-lg transition-shadow duration-300">
-                <div className="w-2/5 sm:w-1/3 flex-shrink-0">
+                <div className="w-2/5 sm:w-1/3 flex-shrink-0"> {/* Image container takes less space on small screens */}
                   <div className="relative aspect-[370/500] w-full rounded-lg overflow-hidden shadow-sm group-hover:shadow-md">
                     <Image
                       src={step.image || `https://placehold.co/370x500.png`}
@@ -186,8 +194,12 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                     />
                   </div>
                 </div>
-                <div className="w-3/5 sm:w-2/3 flex items-center py-1 sm:py-2">
-                  <p className="text-sm sm:text-base text-foreground/90 leading-relaxed">
+                <div className="w-3/5 sm:w-2/3 flex items-center py-1 sm:py-2"> {/* Text container takes more space */}
+                  <p className={cn(
+                      "text-sm sm:text-base text-foreground/90 leading-relaxed",
+                      step.textColor === 'green' && "text-green-600",
+                      step.textColor === 'red' && "text-destructive"
+                    )}>
                     <span className="font-semibold text-primary">{index + 1}. </span>{step.text}
                   </p>
                 </div>
