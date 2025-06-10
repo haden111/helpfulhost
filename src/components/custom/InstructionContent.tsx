@@ -17,6 +17,10 @@ interface DisplayStep {
   dataAiHint: string;
 }
 
+interface InstructionContentProps { // Ensure props type is defined if not already
+  locationData: InstructionLocation | undefined;
+}
+
 const getLocationCodeFromTitle = (title: string, data: Record<string, InstructionLocation>): string | undefined => {
   return Object.keys(data).find(key => data[key].defaultTexts.title === title);
 };
@@ -88,7 +92,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
           if (locationCode && translations && typeof translations[translationKey] === 'string') {
             translatedContent = translations[translationKey];
           }
-          return { ...segment, content: translatedContent }; // Keep original color
+          return { ...segment, content: translatedContent };
         });
         return { ...originalStep, textSegments: translatedSegments };
       });
@@ -125,9 +129,14 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
 
   const currentTitle = displayTitle || locationData?.defaultTexts?.title;
   const currentSteps = (displaySteps.length > 0 ? displaySteps : (locationData?.defaultTexts?.steps.map(step => ({ ...step, textSegments: step.textSegments.map(seg => ({...seg})) }))) || []);
-  const altTextForStep = (step: DisplayStep) => {
-    return step.textSegments.map(seg => seg.content).join(' ').substring(0, 50) + '...'
-  }
+  
+  // Helper function to generate alt text from textSegments
+  const altTextForStep = (step: DisplayStep): string => {
+    if (!step || !step.textSegments || step.textSegments.length === 0) {
+      return 'Instruction image'; // Default alt text if segments are empty
+    }
+    return step.textSegments.map(seg => seg.content).join(' ').substring(0, 100) + '...';
+  };
 
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-xl overflow-hidden">
@@ -189,7 +198,6 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                       <span key={segIndex} className={cn(
                         segment.color === 'green' && "text-green-600 font-medium",
                         segment.color === 'red' && "text-destructive font-medium"
-                        // Default color (black) is inherited from parent <p>
                       )}>
                         {segment.content}
                       </span>
