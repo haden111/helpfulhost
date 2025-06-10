@@ -142,9 +142,9 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         {isLoading && currentSteps.length === 0 ? (
           <div className="space-y-3 sm:space-y-4">
             {[1, 2].map(i => (
-              <div key={i} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-card rounded-lg border border-border/30 shadow-md">
+              <div key={i} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-card rounded-lg border-border/30 shadow-md">
                 <div className="w-2/5 sm:w-1/3 flex-shrink-0">
-                  <div className="relative aspect-[370/500] w-full rounded-lg overflow-hidden shadow-sm border border-border">
+                  <div className="relative aspect-[370/500] w-full rounded-lg overflow-hidden shadow-sm border-2 border-border">
                     <Skeleton className="w-full h-full" />
                   </div>
                 </div>
@@ -162,7 +162,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
             {currentSteps.map((step, index) => (
               <div key={index} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-card rounded-lg border border-border/30 shadow-md hover:shadow-lg transition-shadow duration-300">
                 <div className="w-2/5 sm:w-1/3 flex-shrink-0">
-                  <div className="relative aspect-[370/500] w-full rounded-lg overflow-hidden shadow-sm group-hover:shadow-md border border-border">
+                  <div className="relative aspect-[370/500] w-full rounded-lg overflow-hidden shadow-sm group-hover:shadow-md border-2 border-border">
                     <Image
                       src={step.image || `https://placehold.co/370x500.png`}
                       alt={step.text.substring(0, 50) + '...' || `Instruction step ${index + 1}`}
