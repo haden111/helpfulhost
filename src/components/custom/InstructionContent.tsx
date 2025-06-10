@@ -126,8 +126,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         {isLoading && !currentTitle ? (
           <Skeleton className="h-8 w-3/4" />
         ) : (
-          <CardTitle className="text-2xl md:text-3xl font-semibold text-primary flex items-center gap-2">
-            <Info className="h-7 w-7 text-primary" />
+          <CardTitle className="text-2xl md:text-3xl font-semibold text-primary">
             {currentTitle}
           </CardTitle>
         )}
