@@ -22,7 +22,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
       steps: [
         {
           text: "To unlock the door, enter the code: 1234. ✅",
-          image: "https://placehold.co/370x500.png",
+          image: "z",
           dataAiHint: "keypad door",
           textColor: "green",
         },
