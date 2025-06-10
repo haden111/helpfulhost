@@ -21,7 +21,14 @@ export const instructionsData: Record<string, InstructionLocation> = {
       steps: [
         {
           text: "To unlock the door, enter the code: 1234. ✅",
-          image: "/images/instructions/front-door-keypad.jpg",
+          // Assuming the user might have 'canva_370x550i.png' from an old version,
+          // or '/images/instructions/front-door-keypad.jpg' which might not exist.
+          // If user uploaded 'canva_370x550i.png' to public root, it should be '/canva_370x550i.png'.
+          // If they have '/images/instructions/front-door-keypad.jpg' and it doesn't exist, this placeholder is safer.
+          // The most robust fix if an invalid local path string (not starting with / or http) is present:
+          image: "/images/instructions/front-door-keypad.jpg", // This was the last path provided by user. If it errors, the file likely doesn't exist.
+                                                              // If the actual string in the user's file is "canva_370x550i.png", it should become "/canva_370x550i.png"
+                                                              // For now, I'll keep what was last provided and remind user.
           dataAiHint: "keypad door",
           textColor: "green",
         },
