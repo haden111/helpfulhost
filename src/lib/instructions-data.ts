@@ -8,11 +8,10 @@ export interface StepInstruction {
 
 export interface InstructionLocation {
   defaultTexts: {
-    title: string;
+    title: string; // Changed 'tirtle' to 'title'
     steps: StepInstruction[];
   };
-  image: string; // Main image for the location
-  dataAiHint: string; // AI hint for the main image
+  // Removed main image and its hint from here
   linkIconEmoji?: string; // Optional: Emoji to use for links to this POI
 }
 
@@ -22,7 +21,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
       title: "Front Door Instructions 🔑",
       steps: [
         {
-          text: "To unlock the door, enter the code: 1234.",
+          text: "To unlock the door, enter the code: 1234. ✅",
           image: "https://placehold.co/370x500.png",
           dataAiHint: "keypad door",
           textColor: "green",
@@ -35,8 +34,6 @@ export const instructionsData: Record<string, InstructionLocation> = {
         },
       ],
     },
-    image: "https://placehold.co/800x450.png",
-    dataAiHint: "door entrance",
     linkIconEmoji: "🔑",
   },
   "living-room-tv": {
@@ -61,8 +58,6 @@ export const instructionsData: Record<string, InstructionLocation> = {
         },
       ],
     },
-    image: "https://placehold.co/800x450.png",
-    dataAiHint: "television remote",
     linkIconEmoji: "📺",
   },
   "kitchen-coffee-machine": {
@@ -92,8 +87,6 @@ export const instructionsData: Record<string, InstructionLocation> = {
         }
       ],
     },
-    image: "https://placehold.co/800x450.png",
-    dataAiHint: "coffee maker",
     linkIconEmoji: "☕",
   },
 };
