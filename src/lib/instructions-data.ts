@@ -8,10 +8,9 @@ export interface StepInstruction {
 
 export interface InstructionLocation {
   defaultTexts: {
-    title: string; // Changed 'tirtle' to 'title'
+    title: string;
     steps: StepInstruction[];
   };
-  // Removed main image and its hint from here
   linkIconEmoji?: string; // Optional: Emoji to use for links to this POI
 }
 
@@ -22,7 +21,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
       steps: [
         {
           text: "To unlock the door, enter the code: 1234. ✅",
-          image: "z",
+          image: "https://placehold.co/370x500.png", // Corrected from "z"
           dataAiHint: "keypad door",
           textColor: "green",
         },
