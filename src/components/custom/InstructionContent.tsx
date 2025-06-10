@@ -4,19 +4,17 @@
 import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
-import type { InstructionLocation, StepInstruction } from '@/lib/instructions-data';
+import type { InstructionLocation, StepInstruction, TextSegment } from '@/lib/instructions-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle, Info } from 'lucide-react'; // Info is still used for "No Instructions" alert
+import { AlertCircle, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 
-interface InstructionContentProps {
-  locationData: InstructionLocation;
-}
-
-interface DisplayStep extends StepInstruction {
-  // 'text' will be the translated text, other fields from original StepInstruction
+interface DisplayStep {
+  textSegments: TextSegment[];
+  image: string;
+  dataAiHint: string;
 }
 
 const getLocationCodeFromTitle = (title: string, data: Record<string, InstructionLocation>): string | undefined => {
@@ -44,16 +42,21 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
     const defaultTitle = locationData.defaultTexts.title;
     const defaultSteps = locationData.defaultTexts.steps;
 
+    const fallbackSteps = defaultSteps.map(step => ({
+      ...step,
+      textSegments: step.textSegments.map(segment => ({ ...segment }))
+    }));
+
     if (!language) {
       setDisplayTitle(defaultTitle);
-      setDisplaySteps(defaultSteps.map(step => ({ ...step })));
+      setDisplaySteps(fallbackSteps);
       setIsLoading(false);
       return;
     }
 
     if (language.toLowerCase() === 'en') {
       setDisplayTitle(defaultTitle);
-      setDisplaySteps(defaultSteps.map(step => ({ ...step })));
+      setDisplaySteps(fallbackSteps);
       setIsLoading(false);
       return;
     }
@@ -63,7 +66,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
       if (!response.ok) {
         console.warn(`Could not load translations for ${language} for instruction ${locationData.defaultTexts.title}. Falling back to English.`);
         setDisplayTitle(defaultTitle);
-        setDisplaySteps(defaultSteps.map(step => ({ ...step })));
+        setDisplaySteps(fallbackSteps);
         setIsLoading(false);
         return;
       }
@@ -78,12 +81,16 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
       }
       setDisplayTitle(newTranslatedTitle);
 
-      const tempTranslatedSteps: DisplayStep[] = defaultSteps.map((originalStep, index) => {
-        let translatedText = originalStep.text;
-        if (locationCode && translations && typeof translations[`instructions.${locationCode}.step.${index}`] === 'string') {
-          translatedText = translations[`instructions.${locationCode}.step.${index}`];
-        }
-        return { ...originalStep, text: translatedText };
+      const tempTranslatedSteps: DisplayStep[] = defaultSteps.map((originalStep, stepIndex) => {
+        const translatedSegments = originalStep.textSegments.map((segment, segmentIndex) => {
+          let translatedContent = segment.content;
+          const translationKey = `instructions.${locationCode}.step.${stepIndex}.segment.${segmentIndex}`;
+          if (locationCode && translations && typeof translations[translationKey] === 'string') {
+            translatedContent = translations[translationKey];
+          }
+          return { ...segment, content: translatedContent }; // Keep original color
+        });
+        return { ...originalStep, textSegments: translatedSegments };
       });
       setDisplaySteps(tempTranslatedSteps);
 
@@ -91,7 +98,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
       console.error('Translation fetch error in InstructionContent:', e);
       setFetchError(`Failed to load translations for "${defaultTitle}". Displaying in English.`);
       setDisplayTitle(defaultTitle);
-      setDisplaySteps(defaultSteps.map(step => ({ ...step })));
+      setDisplaySteps(fallbackSteps);
     } finally {
       setIsLoading(false);
     }
@@ -117,7 +124,10 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
   }
 
   const currentTitle = displayTitle || locationData?.defaultTexts?.title;
-  const currentSteps = (displaySteps.length > 0 ? displaySteps : (locationData?.defaultTexts?.steps.map(step => ({ ...step }))) || []);
+  const currentSteps = (displaySteps.length > 0 ? displaySteps : (locationData?.defaultTexts?.steps.map(step => ({ ...step, textSegments: step.textSegments.map(seg => ({...seg})) }))) || []);
+  const altTextForStep = (step: DisplayStep) => {
+    return step.textSegments.map(seg => seg.content).join(' ').substring(0, 50) + '...'
+  }
 
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-xl overflow-hidden">
@@ -142,7 +152,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         {isLoading && currentSteps.length === 0 ? (
           <div className="space-y-3 sm:space-y-4">
             {[1, 2].map(i => (
-              <div key={i} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-card rounded-lg border-black/30 shadow-md">
+              <div key={i} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-card rounded-lg border-2 border-black shadow-md">
                 <div className="w-2/5 sm:w-1/3 flex-shrink-0">
                   <div className="relative aspect-[370/550] w-full rounded-lg overflow-hidden shadow-sm border-2 border-black">
                     <Skeleton className="w-full h-full" />
@@ -160,12 +170,12 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         ) : (
           <div className="space-y-3 sm:space-y-4">
             {currentSteps.map((step, index) => (
-              <div key={index} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-card rounded-lg border border-black/30 shadow-md hover:shadow-lg transition-shadow duration-300">
+              <div key={index} className="flex flex-row gap-3 sm:gap-4 items-stretch p-3 sm:p-4 bg-card rounded-lg border-2 border-black shadow-md hover:shadow-lg transition-shadow duration-300">
                 <div className="w-2/5 sm:w-1/3 flex-shrink-0">
                   <div className="relative aspect-[370/550] w-full rounded-lg overflow-hidden shadow-sm group-hover:shadow-md border-2 border-black">
                     <Image
                       src={step.image || `https://placehold.co/370x550.png`}
-                      alt={step.text.substring(0, 50) + '...' || `Instruction step ${index + 1}`}
+                      alt={altTextForStep(step) || `Instruction step ${index + 1}`}
                       fill
                       sizes="(max-width: 639px) 40vw, (max-width: 767px) 40vw, 33vw"
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -174,12 +184,16 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                   </div>
                 </div>
                 <div className="w-3/5 sm:w-2/3 flex items-center py-1 sm:py-2 pl-1 sm:pl-2">
-                  <p className={cn(
-                      "text-sm sm:text-base text-foreground/90 leading-relaxed",
-                      step.textColor === 'green' && "text-green-600",
-                      step.textColor === 'red' && "text-destructive"
-                    )}>
-                    {step.text}
+                  <p className="text-sm sm:text-base text-foreground/90 leading-relaxed">
+                    {step.textSegments.map((segment, segIndex) => (
+                      <span key={segIndex} className={cn(
+                        segment.color === 'green' && "text-green-600 font-medium",
+                        segment.color === 'red' && "text-destructive font-medium"
+                        // Default color (black) is inherited from parent <p>
+                      )}>
+                        {segment.content}
+                      </span>
+                    ))}
                   </p>
                 </div>
               </div>

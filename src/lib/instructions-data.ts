@@ -1,9 +1,13 @@
 
+export interface TextSegment {
+  content: string;
+  color?: 'green' | 'red'; // Default to standard text color if undefined
+}
+
 export interface StepInstruction {
-  text: string;
-  image: string; // URL for the step-specific image
-  dataAiHint: string; // AI hint for the step-specific image
-  textColor?: 'green' | 'red'; // Optional: for green or red text
+  textSegments: TextSegment[]; // Replaces 'text' and 'textColor'
+  image: string;
+  dataAiHint: string;
 }
 
 export interface InstructionLocation {
@@ -11,32 +15,29 @@ export interface InstructionLocation {
     title: string;
     steps: StepInstruction[];
   };
-  linkIconEmoji?: string; // Optional: Emoji to use for links to this POI
+  linkIconEmoji?: string;
 }
 
 export const instructionsData: Record<string, InstructionLocation> = {
   "front-door": {
     defaultTexts: {
-      title: "Front Door Instructions 🔑",
+      title: "Front Door",
       steps: [
         {
-          text: "To unlock the door, enter the code: 1234. ✅",
-          // Assuming the user might have 'canva_370x550i.png' from an old version,
-          // or '/images/instructions/front-door-keypad.jpg' which might not exist.
-          // If user uploaded 'canva_370x550i.png' to public root, it should be '/canva_370x550i.png'.
-          // If they have '/images/instructions/front-door-keypad.jpg' and it doesn't exist, this placeholder is safer.
-          // The most robust fix if an invalid local path string (not starting with / or http) is present:
-          image: "/images/instructions/front-door-keypad.jpg", // This was the last path provided by user. If it errors, the file likely doesn't exist.
-                                                              // If the actual string in the user's file is "canva_370x550i.png", it should become "/canva_370x550i.png"
-                                                              // For now, I'll keep what was last provided and remind user.
+          textSegments: [
+            { content: "To unlock the door, enter the code: 1234. ", color: 'green' },
+            { content: "✅", color: 'green' }
+          ],
+          image: "/images/instructions/front-door-keypad.jpg", // Example, ensure this exists or use placeholder
           dataAiHint: "keypad door",
-          textColor: "green",
         },
         {
-          text: "To lock the door, press the Schlage button once. ❗Ensure it's fully locked.",
-          image: "https://placehold.co/370x550.png",
+          textSegments: [
+            { content: "To lock the door, press the Schlage button once. ", color: 'red' },
+            { content: "❗Ensure it's fully locked.", color: 'red' }
+          ],
+          image: "/CANVALOCKS.gif", // Example, ensure this exists or use placeholder
           dataAiHint: "door lock",
-          textColor: "red",
         },
       ],
     },
@@ -44,23 +45,29 @@ export const instructionsData: Record<string, InstructionLocation> = {
   },
   "living-room-tv": {
     defaultTexts: {
-      title: "Living Room TV Instructions 🎦",
+      title: "Living Room TV",
       steps: [
         {
-          text: "1️⃣ Use the top-left button on the main TV remote to turn the TV on/off.",
+          textSegments: [
+            { content: "1️⃣ Use the top-left button on the main TV remote to turn the TV on/off." }
+          ],
           image: "https://placehold.co/370x550.png",
           dataAiHint: "tv remote",
         },
         {
-          text: "2️⃣ The 'Source' button on the main TV remote changes input (HDMI1 for Apple TV, HDMI2 for Chromecast).",
+          textSegments: [
+            { content: "2️⃣ The 'Source' button on the main TV remote changes input (HDMI1 for Apple TV, HDMI2 for Chromecast)." }
+          ],
           image: "https://placehold.co/370x550.png",
           dataAiHint: "remote source",
         },
         {
-          text: "3️⃣ Volume controls are on the main TV remote. ✅ The Apple TV remote controls the Apple TV interface.",
+          textSegments: [
+            { content: "3️⃣ Volume controls are on the main TV remote. ", color: 'green' },
+            { content: "✅ The Apple TV remote controls the Apple TV interface.", color: 'green' }
+          ],
           image: "https://placehold.co/370x550.png",
           dataAiHint: "apple tv",
-          textColor: "green",
         },
       ],
     },
@@ -68,28 +75,35 @@ export const instructionsData: Record<string, InstructionLocation> = {
   },
   "kitchen-coffee-machine": {
     defaultTexts: {
-      title: "Kitchen Coffee Machine Instructions ☕",
+      title: "Kitchen Coffee Machine",
       steps: [
         {
-          text: "Ensure the water tank at the back is filled with fresh water. 🚰",
+          textSegments: [
+            { content: "Ensure the water tank at the back is filled with fresh water. 🚰" }
+          ],
           image: "https://placehold.co/370x550.png",
           dataAiHint: "water tank",
         },
         {
-          text: "Lift the handle, place a coffee pod in the slot, and firmly close the handle.",
+          textSegments: [
+            { content: "Lift the handle, place a coffee pod in the slot, and firmly close the handle." }
+          ],
           image: "https://placehold.co/370x550.png",
           dataAiHint: "coffee pod",
         },
         {
-          text: "Select your desired coffee size (small or large cup icon) and press the button to brew.",
+          textSegments: [
+            { content: "Select your desired coffee size (small or large cup icon) and press the button to brew." }
+          ],
           image: "https://placehold.co/370x550.png",
           dataAiHint: "brew button",
         },
         {
-          text: "⛔ Do not open the handle during brewing cycle.",
+          textSegments: [
+            { content: "⛔ Do not open the handle during brewing cycle.", color: 'red' }
+          ],
           image: "https://placehold.co/370x550.png",
           dataAiHint: "warning sign",
-          textColor: "red",
         }
       ],
     },

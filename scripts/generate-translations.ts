@@ -49,8 +49,10 @@ async function generateTranslations() {
   // Populate from instructionsData
   for (const [locationCode, locationDetails] of Object.entries(appInstructionsData)) {
     allDefaultTexts[`instructions.${locationCode}.title`] = locationDetails.defaultTexts.title;
-    locationDetails.defaultTexts.steps.forEach((step, index) => {
-      allDefaultTexts[`instructions.${locationCode}.step.${index}`] = step.text;
+    locationDetails.defaultTexts.steps.forEach((step, stepIndex) => {
+      step.textSegments.forEach((segment, segmentIndex) => {
+        allDefaultTexts[`instructions.${locationCode}.step.${stepIndex}.segment.${segmentIndex}`] = segment.content;
+      });
     });
   }
 
@@ -106,10 +108,6 @@ async function generateTranslations() {
     
     translationPromises.push(translationPromise);
     
-    // Optional: Add a delay between initiating calls if hitting immediate rate limits, though Genkit might handle some of this.
-    // This delay is now less critical as we batch with Promise.all, but can be useful if the translateInstructionalText itself is internally very fast and we're starting too many "concurrent" Genkit flows.
-    // For now, Promise.all will manage concurrency of these outer promises.
-    // await new Promise(resolve => setTimeout(resolve, 1000)); // e.g., 1-second delay before starting the next language
   }
 
   // Wait for all translation promises to settle
@@ -125,11 +123,9 @@ async function generateTranslations() {
 generateTranslations()
   .then(() => {
     console.log("Script finished successfully.");
-    // Genkit flows might keep the process alive. Explicitly exit.
     process.exit(0);
   })
   .catch((error) => {
     console.error("Unhandled error in generateTranslations script:", error);
     process.exit(1);
   });
-
