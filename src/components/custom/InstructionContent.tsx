@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react'; // Added React for React.Fragment
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import type { InstructionLocation, StepInstruction, TextSegment } from '@/lib/instructions-data';
@@ -17,7 +17,7 @@ interface DisplayStep {
   dataAiHint: string;
 }
 
-interface InstructionContentProps { // Ensure props type is defined if not already
+interface InstructionContentProps {
   locationData: InstructionLocation | undefined;
 }
 
@@ -130,10 +130,9 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
   const currentTitle = displayTitle || locationData?.defaultTexts?.title;
   const currentSteps = (displaySteps.length > 0 ? displaySteps : (locationData?.defaultTexts?.steps.map(step => ({ ...step, textSegments: step.textSegments.map(seg => ({...seg})) }))) || []);
   
-  // Helper function to generate alt text from textSegments
   const altTextForStep = (step: DisplayStep): string => {
     if (!step || !step.textSegments || step.textSegments.length === 0) {
-      return 'Instruction image'; // Default alt text if segments are empty
+      return 'Instruction image'; 
     }
     return step.textSegments.map(seg => seg.content).join(' ').substring(0, 100) + '...';
   };
@@ -193,16 +192,19 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                   </div>
                 </div>
                 <div className="w-3/5 sm:w-2/3 flex items-center py-1 sm:py-2 pl-1 sm:pl-2">
-                  <p className="text-sm sm:text-base text-foreground/90 leading-relaxed">
+                  <div className="text-sm sm:text-base text-foreground/90 leading-relaxed">
                     {step.textSegments.map((segment, segIndex) => (
-                      <span key={segIndex} className={cn(
-                        segment.color === 'green' && "text-green-600 font-medium",
-                        segment.color === 'red' && "text-destructive font-medium"
-                      )}>
-                        {segment.content}
-                      </span>
+                      <React.Fragment key={segIndex}>
+                        {segIndex > 0 && <br />}
+                        <span className={cn(
+                          segment.color === 'green' && "text-green-600 font-medium",
+                          segment.color === 'red' && "text-destructive font-medium"
+                        )}>
+                          {segment.content}
+                        </span>
+                      </React.Fragment>
                     ))}
-                  </p>
+                  </div>
                 </div>
               </div>
             ))}

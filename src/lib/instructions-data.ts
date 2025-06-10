@@ -25,10 +25,10 @@ export const instructionsData: Record<string, InstructionLocation> = {
       steps: [
         {
           textSegments: [
-            { content: "To unlock the door, enter the code: 1234. ", color: 'green' },
-            { content: "✅", color: 'green' }
+            { content: "✅", color: 'green' },
+            { content: "When you leave the house, simply pull the door closed without further locking", color: 'green' }
           ],
-          image: "/images/instructions/front-door-keypad.jpg", // Example, ensure this exists or use placeholder
+          image: "/canva_370x550i.png", // Example, ensure this exists or use placeholder
           dataAiHint: "keypad door",
         },
         {
