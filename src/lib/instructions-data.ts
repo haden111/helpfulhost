@@ -21,13 +21,13 @@ export const instructionsData: Record<string, InstructionLocation> = {
       steps: [
         {
           text: "To unlock the door, enter the code: 1234. ✅",
-          image: "/images/instructions/front-door-keypad.jpg", // EXAMPLE: Assumes image is at public/images/instructions/front-door-keypad.jpg
+          image: "/images/instructions/front-door-keypad.jpg",
           dataAiHint: "keypad door",
           textColor: "green",
         },
         {
           text: "To lock the door, press the Schlage button once. ❗Ensure it's fully locked.",
-          image: "https://placehold.co/370x500.png",
+          image: "https://placehold.co/370x550.png",
           dataAiHint: "door lock",
           textColor: "red",
         },
@@ -41,17 +41,17 @@ export const instructionsData: Record<string, InstructionLocation> = {
       steps: [
         {
           text: "1️⃣ Use the top-left button on the main TV remote to turn the TV on/off.",
-          image: "https://placehold.co/370x500.png",
+          image: "https://placehold.co/370x550.png",
           dataAiHint: "tv remote",
         },
         {
           text: "2️⃣ The 'Source' button on the main TV remote changes input (HDMI1 for Apple TV, HDMI2 for Chromecast).",
-          image: "https://placehold.co/370x500.png",
+          image: "https://placehold.co/370x550.png",
           dataAiHint: "remote source",
         },
         {
           text: "3️⃣ Volume controls are on the main TV remote. ✅ The Apple TV remote controls the Apple TV interface.",
-          image: "https://placehold.co/370x500.png",
+          image: "https://placehold.co/370x550.png",
           dataAiHint: "apple tv",
           textColor: "green",
         },
@@ -65,22 +65,22 @@ export const instructionsData: Record<string, InstructionLocation> = {
       steps: [
         {
           text: "Ensure the water tank at the back is filled with fresh water. 🚰",
-          image: "https://placehold.co/370x500.png",
+          image: "https://placehold.co/370x550.png",
           dataAiHint: "water tank",
         },
         {
           text: "Lift the handle, place a coffee pod in the slot, and firmly close the handle.",
-          image: "https://placehold.co/370x500.png",
+          image: "https://placehold.co/370x550.png",
           dataAiHint: "coffee pod",
         },
         {
           text: "Select your desired coffee size (small or large cup icon) and press the button to brew.",
-          image: "https://placehold.co/370x500.png",
+          image: "https://placehold.co/370x550.png",
           dataAiHint: "brew button",
         },
         {
           text: "⛔ Do not open the handle during brewing cycle.",
-          image: "https://placehold.co/370x500.png",
+          image: "https://placehold.co/370x550.png",
           dataAiHint: "warning sign",
           textColor: "red",
         }
