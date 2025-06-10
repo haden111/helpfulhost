@@ -25,8 +25,9 @@ export const instructionsData: Record<string, InstructionLocation> = {
       steps: [
         {
           textSegments: [
-            { content: "✅", color: 'green' },
-            { content: "When you leave the house, simply pull the door closed without further locking", color: 'green' }
+            { content: "✅ When you leave the house, simply pull the door closed without further locking", color: 'green' },
+            { content: "✅ When you return, simply use your key on the top lock to gain entry", color: 'green' },
+            { content: "⛔ Do not use the bottom lock at all!", color: 'red' }
           ],
           image: "/canva_370x550i.png", // Example, ensure this exists or use placeholder
           dataAiHint: "keypad door",
@@ -34,7 +35,8 @@ export const instructionsData: Record<string, InstructionLocation> = {
         {
           textSegments: [
             { content: "To lock the door, press the Schlage button once. ", color: 'red' },
-            { content: "❗Ensure it's fully locked.", color: 'red' }
+            { content: "❗Ensure it's fully locked.", color: 'red' },
+            { content: "❗Ensure it's fully locked.", color: 'green' }
           ],
           image: "/CANVALOCKS.gif", // Example, ensure this exists or use placeholder
           dataAiHint: "door lock",

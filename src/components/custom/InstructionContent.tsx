@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react'; // Added React for React.Fragment
+import React, { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import type { InstructionLocation, StepInstruction, TextSegment } from '@/lib/instructions-data';
@@ -194,15 +194,18 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                 <div className="w-3/5 sm:w-2/3 flex items-center py-1 sm:py-2 pl-1 sm:pl-2">
                   <div className="text-sm sm:text-base text-foreground/90 leading-relaxed">
                     {step.textSegments.map((segment, segIndex) => (
-                      <React.Fragment key={segIndex}>
-                        {segIndex > 0 && <br />}
-                        <span className={cn(
+                      <div // Changed from React.Fragment to div
+                        key={segIndex}
+                        className={cn(
+                          // Add margin-bottom to all segments except the last one
+                          segIndex < step.textSegments.length - 1 ? "mb-2" : "", 
                           segment.color === 'green' && "text-green-600 font-medium",
                           segment.color === 'red' && "text-destructive font-medium"
-                        )}>
-                          {segment.content}
-                        </span>
-                      </React.Fragment>
+                          // Default color is inherited from parent
+                        )}
+                      >
+                        {segment.content}
+                      </div>
                     ))}
                   </div>
                 </div>
