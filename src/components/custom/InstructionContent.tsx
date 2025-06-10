@@ -7,7 +7,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import type { InstructionLocation, StepInstruction } from '@/lib/instructions-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle, Info } from 'lucide-react';
+import { AlertCircle, Info } from 'lucide-react'; // Info is still imported for Alerts below
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 
@@ -83,7 +83,6 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         if (locationCode && translations && typeof translations[`instructions.${locationCode}.step.${index}`] === 'string') {
           translatedText = translations[`instructions.${locationCode}.step.${index}`];
         }
-        // Carry over all original properties, including image, dataAiHint, and textColor
         return { ...originalStep, text: translatedText };
       });
       setDisplaySteps(tempTranslatedSteps);
@@ -132,8 +131,6 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
         )}
       </CardHeader>
       <CardContent className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4">
-        {/* Removed the main locationData.image rendering block */}
-
         {fetchError && !isLoading && (
           <Alert variant="destructive" className="my-4">
             <AlertCircle className="h-4 w-4" />
@@ -179,8 +176,8 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                 <div className="w-3/5 sm:w-2/3 flex items-center py-1 sm:py-2 pl-1 sm:pl-2">
                   <p className={cn(
                       "text-sm sm:text-base text-foreground/90 leading-relaxed",
-                      step.textColor === 'green' && "text-green-600", // Tailwind class for green
-                      step.textColor === 'red' && "text-destructive" // Theme variable for red
+                      step.textColor === 'green' && "text-green-600",
+                      step.textColor === 'red' && "text-destructive"
                     )}>
                     {step.text}
                   </p>
