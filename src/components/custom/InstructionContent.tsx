@@ -25,6 +25,12 @@ const getLocationCodeFromTitle = (title: string, data: Record<string, Instructio
   return Object.keys(data).find(key => data[key].defaultTexts.title === title);
 };
 
+// Helper function to strip HTML tags
+const stripHtml = (html: string): string => {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || "";
+};
+
 export function InstructionContent({ locationData }: InstructionContentProps) {
   const { language } = useLanguage();
 
@@ -134,7 +140,9 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
     if (!step || !step.textSegments || step.textSegments.length === 0) {
       return 'Instruction image'; 
     }
-    return step.textSegments.map(seg => seg.content).join(' ').substring(0, 100) + '...';
+    // Strip HTML tags from content for alt text
+    const plainTextContent = step.textSegments.map(seg => stripHtml(seg.content)).join(' ');
+    return plainTextContent.substring(0, 100) + '...';
   };
 
   return (
@@ -194,18 +202,15 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                 <div className="w-3/5 sm:w-2/3 flex items-center py-1 sm:py-2 pl-1 sm:pl-2">
                   <div className="text-sm sm:text-base text-foreground/90 leading-relaxed">
                     {step.textSegments.map((segment, segIndex) => (
-                      <div // Changed from React.Fragment to div
+                      <div
                         key={segIndex}
                         className={cn(
-                          // Add margin-bottom to all segments except the last one
                           segIndex < step.textSegments.length - 1 ? "mb-2" : "", 
                           segment.color === 'green' && "text-green-600 font-medium",
                           segment.color === 'red' && "text-destructive font-medium"
-                          // Default color is inherited from parent
                         )}
-                      >
-                        {segment.content}
-                      </div>
+                        dangerouslySetInnerHTML={{ __html: segment.content }}
+                      />
                     ))}
                   </div>
                 </div>
