@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -9,7 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z}from 'genkit';
 
 const AutoDetectLanguageInputSchema = z.object({
   ipAddress: z.string().optional().describe('The IP address of the user.'),
@@ -45,12 +46,23 @@ const autoDetectLanguageFlow = ai.defineFlow(
   {
     name: 'autoDetectLanguageFlow',
     inputSchema: AutoDetectLanguageInputSchema,
-    outputSchema: AutoDetectLanguageOutputSchema,
+    outputSchema: AutoDetectLanguageOutputSchema, // This is what the flow *promises* to return
   },
-  async input => {
-    const {output} = await autoDetectLanguagePrompt(input);
-    return {
-      languageCode: output!.languageCode,
-    };
+  async (input): Promise<AutoDetectLanguageOutput> => { // Explicitly type the promise
+    try {
+      const { output: modelOutput } = await autoDetectLanguagePrompt(input);
+
+      if (modelOutput && typeof modelOutput.languageCode === 'string' && modelOutput.languageCode.trim() !== '') {
+        return {
+          languageCode: modelOutput.languageCode.trim().toLowerCase(),
+        };
+      }
+      
+      console.warn('AutoDetectLanguageFlow: Model did not return a valid languageCode or output was null. Falling back to "en". Model output:', modelOutput);
+      return { languageCode: 'en' }; // Fallback language code
+    } catch (error) {
+      console.error('AutoDetectLanguageFlow: Error during prompt execution. Falling back to "en". Error:', error);
+      return { languageCode: 'en' }; // Fallback language code in case of error during prompt call
+    }
   }
 );
