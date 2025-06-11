@@ -35,11 +35,11 @@ export const instructionsData: Record<string, InstructionLocation> = {
         },
         {
           textSegments: [ // Ensured this is an array
-            { content: "<b>Inside:</b>", color: 'black' },
+            { content: "<B>Inside:</B>", color: 'black' },
             { content: "⛔ Please never bolt the door or use the safety catch when inside the house", color: 'red' },
             { content: "❗<b>This will mean that the host cannot get into the house!</b>", color: 'black' }
           ],
-          image: "/CANVALOCKS.gif", // Assuming this file exists in public, otherwise use /CANVALOCKS.gif or placeholder
+          image: "/CANVALOCKS.gif",
           dataAiHint: "door lock",
         },
       ],
