@@ -1,11 +1,11 @@
 
 export interface TextSegment {
   content: string;
-  color?: 'green' | 'red'; // Default to standard text color if undefined
+  color?: 'green' | 'red' | 'black'; // Added 'black' for clarity, though it's default
 }
 
 export interface StepInstruction {
-  textSegments: TextSegment[]; // Replaces 'text' and 'textColor'
+  textSegments: TextSegment[];
   image: string;
   dataAiHint: string;
 }
@@ -25,20 +25,21 @@ export const instructionsData: Record<string, InstructionLocation> = {
       steps: [
         {
           textSegments: [
+            { content: "<b>Outside:</b>", color: 'black' },
             { content: "✅ When you leave the house, simply pull the door closed without further locking", color: 'green' },
             { content: "✅ When you return, simply use your key on the top lock to gain entry", color: 'green' },
             { content: "⛔ Do not use the bottom lock at all!", color: 'red' }
           ],
-          image: "/canva_370x550i.png", // Example, ensure this exists or use placeholder
+          image: "/images/instructions/front-door-keypad.jpg",
           dataAiHint: "keypad door",
         },
         {
-          textSegments: [
-            { content: "To lock the door, press the Schlage button once. ", color: 'red' },
-            { content: "❗Ensure it's fully locked.", color: 'red' },
-            { content: "❗Ensure it's fully locked.", color: 'green' }
+          textSegments: [ // Ensured this is an array
+            { content: "<b>Inside:</b>", color: 'black' },
+            { content: "⛔ Please never bolt the door or use the safety catch when inside the house", color: 'red' },
+            { content: "❗<b>This will mean that the host cannot get into the house!</b>", color: 'black' }
           ],
-          image: "/CANVALOCKS.gif", // Example, ensure this exists or use placeholder
+          image: "/CANVALOCKS.gif", // Assuming this file exists in public, otherwise use /CANVALOCKS.gif or placeholder
           dataAiHint: "door lock",
         },
       ],
