@@ -25,10 +25,13 @@ const getLocationCodeFromTitle = (title: string, data: Record<string, Instructio
   return Object.keys(data).find(key => data[key].defaultTexts.title === title);
 };
 
-// Helper function to strip HTML tags
+// Helper function to strip HTML tags (though content is now plain text, good to keep for future)
 const stripHtml = (html: string): string => {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  return doc.body.textContent || "";
+  if (typeof document !== 'undefined') {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    return doc.body.textContent || "";
+  }
+  return html; // Fallback for server-side or if DOMParser not available
 };
 
 export function InstructionContent({ locationData }: InstructionContentProps) {
@@ -98,6 +101,7 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
           if (locationCode && translations && typeof translations[translationKey] === 'string') {
             translatedContent = translations[translationKey];
           }
+          // Retain original bold and color properties, only content is translated
           return { ...segment, content: translatedContent };
         });
         return { ...originalStep, textSegments: translatedSegments };
@@ -140,9 +144,8 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
     if (!step || !step.textSegments || step.textSegments.length === 0) {
       return 'Instruction image'; 
     }
-    // Strip HTML tags from content for alt text
     const plainTextContent = step.textSegments.map(seg => stripHtml(seg.content)).join(' ');
-    return plainTextContent.substring(0, 100) + '...';
+    return plainTextContent.substring(0, 100) + (plainTextContent.length > 100 ? '...' : '');
   };
 
   return (
@@ -206,11 +209,13 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                         key={segIndex}
                         className={cn(
                           segIndex < step.textSegments.length - 1 ? "mb-2" : "", 
-                          segment.color === 'green' && "text-green-600 font-medium",
-                          segment.color === 'red' && "text-destructive font-medium"
+                          segment.color === 'green' && "text-green-600", // Removed font-medium from here
+                          segment.color === 'red' && "text-destructive", // Removed font-medium from here
+                          segment.bold && "font-bold" // Added conditional bold class
                         )}
-                        dangerouslySetInnerHTML={{ __html: segment.content }}
-                      />
+                      >
+                        {segment.content} {/* Render content as plain text */}
+                      </div>
                     ))}
                   </div>
                 </div>

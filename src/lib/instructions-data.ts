@@ -1,7 +1,8 @@
 
 export interface TextSegment {
   content: string;
-  color?: 'green' | 'red' | 'black'; // Added 'black' for clarity, though it's default
+  color?: 'green' | 'red' | 'black';
+  bold?: boolean; // Added bold property
 }
 
 export interface StepInstruction {
@@ -25,21 +26,21 @@ export const instructionsData: Record<string, InstructionLocation> = {
       steps: [
         {
           textSegments: [
-            { content: "<b>Outside:</b>", color: 'black' },
+            { content: "Outside:", color: 'black', bold: true },
             { content: "✅ When you leave the house, simply pull the door closed without further locking", color: 'green' },
             { content: "✅ When you return, simply use your key on the top lock to gain entry", color: 'green' },
             { content: "⛔ Do not use the bottom lock at all!", color: 'red' }
           ],
-          image: "/images/instructions/front-door-keypad.jpg",
+          image: "/images/instructions/front-door-keypad.jpg", // Ensure this path is correct
           dataAiHint: "keypad door",
         },
         {
-          textSegments: [ // Ensured this is an array
-            { content: "<B>Inside:</B>", color: 'black' },
+          textSegments: [
+            { content: "Inside:", color: 'black', bold: true },
             { content: "⛔ Please never bolt the door or use the safety catch when inside the house", color: 'red' },
-            { content: "❗<b>This will mean that the host cannot get into the house!</b>", color: 'black' }
+            { content: "❗This will mean that the host cannot get into the house!", color: 'black' } // Ensure this is not bold
           ],
-          image: "/CANVALOCKS.gif",
+          image: "/CANVALOCKS.gif", // Ensure this path is correct or use placeholder
           dataAiHint: "door lock",
         },
       ],
