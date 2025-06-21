@@ -22,9 +22,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Haden's Airbnb",
   description: 'Your friendly guide for a comfortable stay at Haden\'s Airbnb.',
-  icons: {
-    icon: '/favicon.ico', // Assuming a favicon might be added later or derived from logo
-  },
 };
 
 export const viewport: Viewport = {
