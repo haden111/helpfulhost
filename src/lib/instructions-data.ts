@@ -31,7 +31,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
             { content: "✅ When you return, simply use your key on the top lock to gain entry", color: 'green' },
             { content: "⛔ Do not use the bottom lock at all!", color: 'red' }
           ],
-          image: "/images/instructions/front-door-keypad.jpg", // Ensure this path is correct
+          image: "/canva_370x550i.png", // Ensure this path is correct
           dataAiHint: "keypad door",
         },
         {
@@ -47,9 +47,9 @@ export const instructionsData: Record<string, InstructionLocation> = {
     },
     linkIconEmoji: "🔑",
   },
-  "living-room-tv": {
+  "back-door": {
     defaultTexts: {
-      title: "Living Room TV",
+      title: "Back Door",
       steps: [
         {
           textSegments: [

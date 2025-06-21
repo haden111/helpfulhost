@@ -49,6 +49,12 @@ const autoDetectLanguageFlow = ai.defineFlow(
     outputSchema: AutoDetectLanguageOutputSchema, // This is what the flow *promises* to return
   },
   async (input): Promise<AutoDetectLanguageOutput> => { // Explicitly type the promise
+    // Check for API key to avoid unnecessary and noisy fetch errors during development.
+    if (!process.env.GOOGLE_API_KEY && !process.env.GOOGLE_GEMINI_API_KEY) {
+      console.warn("Google AI API key is not set. Skipping AI language detection and falling back to English.");
+      return { languageCode: 'en' };
+    }
+    
     try {
       const { output: modelOutput } = await autoDetectLanguagePrompt(input);
 
