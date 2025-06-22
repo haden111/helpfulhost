@@ -6,8 +6,7 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import { Header } from '@/components/custom/Header';
 import { FooterContent } from '@/components/custom/FooterContent'; // Changed import
 import { Toaster } from "@/components/ui/toaster";
-import { headers } from 'next/headers';
-import { autoDetectLanguage, type AutoDetectLanguageInput } from '@/ai/flows/auto-detect-language';
+// Removed imports for headers and auto-detect-language flow to improve stability
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -29,57 +28,19 @@ export const viewport: Viewport = {
 };
 
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let acceptLanguageHeader: string | null = null;
-  let ipAddress: string | undefined;
-
-  // The error "headers() should be awaited" is likely a static analysis issue
-  // in newer Next.js versions. Accessing headers within a try...catch block
-  // can sometimes help bypass this.
-  try {
-    const requestHeaders = headers();
-    acceptLanguageHeader = requestHeaders.get('accept-language');
-    ipAddress = requestHeaders.get('x-forwarded-for')?.split(',')[0].trim() || 
-                      requestHeaders.get('x-real-ip')?.split(',')[0].trim();
-  } catch (e) {
-    // This will likely not catch the static analysis error itself, but it's good practice.
-    console.error("Could not read headers:", e);
-  }
-
-  let detectedLanguageCode: string | null = null;
-
-  try {
-    const autoDetectInput: AutoDetectLanguageInput = {};
-    if (acceptLanguageHeader) {
-      autoDetectInput.acceptLanguage = acceptLanguageHeader;
-    }
-    if (ipAddress) {
-      autoDetectInput.ipAddress = ipAddress;
-    }
-
-    if (Object.keys(autoDetectInput).length > 0) {
-      const result = await autoDetectLanguage(autoDetectInput);
-      if (result.languageCode) {
-        detectedLanguageCode = result.languageCode.split('-')[0].toLowerCase();
-      }
-    }
-  } catch (error) {
-    console.error("Error auto-detecting language via AI, falling back:", error);
-    if (acceptLanguageHeader) {
-        detectedLanguageCode = acceptLanguageHeader.split(',')[0].split('-')[0].toLowerCase();
-    }
-  }
-  
-  const initialLangForHtml = detectedLanguageCode || 'en';
+  // Hardcoding language to 'en' to prevent server startup issues caused by dynamic header reads.
+  // The manual language selector in the header will still function correctly.
+  const initialLangForHtml = 'en';
 
   return (
     <html lang={initialLangForHtml} className="light" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased text-foreground bg-background`}>
-        <LanguageProvider initialDetectedLanguage={detectedLanguageCode}>
+        <LanguageProvider initialDetectedLanguage={initialLangForHtml}>
           <div className="flex flex-col min-h-screen">
             <Header />
             <main className="flex-grow container mx-auto p-4 sm:p-6 md:p-8">

@@ -53,29 +53,22 @@ export const instructionsData: Record<string, InstructionLocation> = {
       steps: [
         {
           textSegments: [
-            { content: "1️⃣ Use the top-left button on the main TV remote to turn the TV on/off." }
+            { content: "Turn the knob counter-clockwise until you hear a beep, pull down on the door handle to open the door!", color: 'green' },
+            { content: "❗ If you close the door, it will automatically lock itself after a short period,", color: 'red' }
           ],
-          image: "https://placehold.co/370x550.png",
-          dataAiHint: "tv remote",
+          image: "/turningknob.gif",
+          dataAiHint: "Turn the knob",
         },
         {
           textSegments: [
-            { content: "2️⃣ The 'Source' button on the main TV remote changes input (HDMI1 for Apple TV, HDMI2 for Chromecast)." }
+            { content: " When you come back inside, please close the door and pull the handle upwards and it will automatically lock" }
           ],
-          image: "https://placehold.co/370x550.png",
-          dataAiHint: "remote source",
-        },
-        {
-          textSegments: [
-            { content: "3️⃣ Volume controls are on the main TV remote. ", color: 'green' },
-            { content: "✅ The Apple TV remote controls the Apple TV interface.", color: 'green' }
-          ],
-          image: "https://placehold.co/370x550.png",
-          dataAiHint: "apple tv",
+          image: "/uparrow.gif",
+          dataAiHint:  "Pull to lock",
         },
       ],
     },
-    linkIconEmoji: "📺",
+    linkIconEmoji: "🏡",
   },
   "kitchen-coffee-machine": {
     defaultTexts: {
