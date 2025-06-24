@@ -7,7 +7,7 @@ import { WelcomeInstructionLinks } from '@/components/custom/WelcomeInstructionL
 export default function WelcomePage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] py-8">
-      <Card className="w-full max-w-lg shadow-2xl bg-card rounded-xl overflow-hidden">
+      <Card className="w-full max-w-2xl shadow-2xl bg-card rounded-xl overflow-hidden">
         <CardHeader className="text-center bg-primary/20 p-8">
           <div className="mx-auto mb-6 flex justify-center">
             <Image
