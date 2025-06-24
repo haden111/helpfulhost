@@ -2,7 +2,7 @@
 "use client";
 
 import type { ReactNode } from 'react';
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import * as React from 'react';
 import { supportedLanguages, type Language } from '@/lib/languages';
 
 const COOKIE_NAME = 'hadens-helpful-host-lang';
@@ -14,7 +14,7 @@ interface LanguageContextType {
   isLanguageSupported: (langCode: string) => boolean;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = React.createContext<LanguageContextType | undefined>(undefined);
 
 // Helper functions for cookies
 const getCookie = (name: string): string | null => {
@@ -44,13 +44,13 @@ export const LanguageProvider = ({
 }) => {
 
   // This function is memoized and provided to context consumers.
-  const isLanguageSupported = useCallback((langCode: string): boolean => {
+  const isLanguageSupported = React.useCallback((langCode: string): boolean => {
     return supportedLanguages.some(l => l.code.toLowerCase() === langCode.toLowerCase());
   }, []);
 
   // Initialize state using a function for one-time computation.
   // The logic for checking support is inlined here to avoid calling the useCallback version from the initializer.
-  const [currentLanguage, setCurrentLanguageState] = useState<string>(() => {
+  const [currentLanguage, setCurrentLanguageState] = React.useState<string>(() => {
     const checkSupportForInit = (code: string): boolean => 
       supportedLanguages.some(l => l.code.toLowerCase() === code.toLowerCase());
 
@@ -70,7 +70,7 @@ export const LanguageProvider = ({
     return supportedLanguages.length > 0 ? supportedLanguages[0].code : 'en'; // Absolute fallback
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     // This effect ensures the html lang attribute is updated whenever currentLanguage changes.
     if (typeof document !== 'undefined') {
       document.documentElement.lang = currentLanguage;
@@ -95,7 +95,7 @@ export const LanguageProvider = ({
 };
 
 export const useLanguage = (): LanguageContextType => {
-  const context = useContext(LanguageContext);
+  const context = React.useContext(LanguageContext);
   if (context === undefined) {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
