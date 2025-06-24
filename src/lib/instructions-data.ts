@@ -61,7 +61,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
         },
         {
           textSegments: [
-            { content: " When you come back inside, please close the door and pull the handle upwards and it will automatically lock" }
+            { content: " When you come back inside, please close the door and pull the handle upwards and it will 7h                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                dx    z lock" }
           ],
           image: "/uparrow.gif",
           dataAiHint:  "Pull to lock",
@@ -70,23 +70,23 @@ export const instructionsData: Record<string, InstructionLocation> = {
     },
     linkIconEmoji: "🏡",
   },
-  "kitchen-coffee-machine": {
+  "kitchen": {
     defaultTexts: {
-      title: "Kitchen Coffee Machine",
+      title: "Kitchen",
       steps: [
         {
           textSegments: [
-            { content: "Ensure the water tank at the back is filled with fresh water. 🚰" }
+            { content: "Turn on the kitchen lights using the green flashing switch", color: 'green'  }
           ],
-          image: "https://placehold.co/370x550.png",
-          dataAiHint: "water tank",
+          image: "/kitchenlights.gif",
+          dataAiHint: "kitchen lights",
         },
         {
           textSegments: [
-            { content: "Lift the handle, place a coffee pod in the slot, and firmly close the handle." }
+            { content: "You are welcome to use the kitchen to store and make food during your stay. Please help yourself to tea and coffee!", color: 'black'  }
           ],
-          image: "https://placehold.co/370x550.png",
-          dataAiHint: "coffee pod",
+          image: "/LIGHTSON.png",
+          dataAiHint: "Lights on",
         },
         {
           textSegments: [
