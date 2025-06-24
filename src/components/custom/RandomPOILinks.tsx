@@ -52,7 +52,7 @@ export function RandomPOILinks({ currentLocationCode }: RandomPOILinksProps) {
         <h3 className="text-xl font-semibold mb-6 text-center text-primary">
           <Skeleton className="h-7 w-1/2 mx-auto" />
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[...Array(3)].map((_, index) => (
             <Skeleton key={index} className="h-20 w-full rounded-lg" />
           ))}
@@ -80,12 +80,12 @@ export function RandomPOILinks({ currentLocationCode }: RandomPOILinksProps) {
         <ListChecks className="h-6 w-6" />
         Explore Other Instructions
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {randomLinks.map(link => (
-          <Button variant="outline" className="w-full justify-start text-left h-auto py-3 shadow-sm hover:shadow-md transition-shadow" asChild key={link.code}>
-            <Link href={`/instructions/${link.code}`} className="flex items-center gap-3">
+          <Button variant="outline" className="w-full justify-start text-left h-auto p-3 shadow-sm hover:shadow-md transition-shadow" asChild key={link.code}>
+            <Link href={`/instructions/${link.code}`} className="flex items-center gap-2">
               {link.emoji ? (
-                <span className="text-2xl flex-shrink-0 w-6 text-center">{link.emoji}</span>
+                <span className="text-xl flex-shrink-0 w-6 text-center">{link.emoji}</span>
               ) : (
                 <ArrowRightCircle className="h-5 w-5 text-accent flex-shrink-0" />
               )}
