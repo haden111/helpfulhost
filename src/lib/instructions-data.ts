@@ -61,7 +61,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
         },
         {
           textSegments: [
-            { content: " When you come back inside, please close the door and pull the handle upwards and it will 7h                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                dx    z lock" }
+            { content: "When you come back inside, please close the door and pull the handle upwards and it will lock.", color: 'green' }
           ],
           image: "/uparrow.gif",
           dataAiHint:  "Pull to lock",
@@ -105,5 +105,20 @@ export const instructionsData: Record<string, InstructionLocation> = {
       ],
     },
     linkIconEmoji: "☕",
+  },
+  "bathroom": {
+    defaultTexts: {
+      title: "Bathroom",
+      steps: [
+        {
+          textSegments: [
+            { content: "If using the shower, please switch on the extractor fan and open the window to prevent steam build up", color: 'green' }
+          ],
+          image: "/toilet.png",
+          dataAiHint: "Extractor Fan",
+        }
+      ],
+    },
+    linkIconEmoji: "🚿",
   },
 };
