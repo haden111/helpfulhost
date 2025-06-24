@@ -22,7 +22,7 @@ export default function WelcomePage() {
           {/* Translatable content will be rendered by WelcomeMessage */}
           <WelcomeMessage />
         </CardHeader>
-        <CardContent className="p-8 pt-0">
+        <CardContent className="p-6 pt-0">
           
           {/* "Quick Access Instructions" header is now part of WelcomeMessage */}
           {/* The buttons are now randomly selected from available instructions */}

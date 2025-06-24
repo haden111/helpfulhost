@@ -69,7 +69,7 @@ export function WelcomeInstructionLinks() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
         <Skeleton className="h-20 w-full" />
         <Skeleton className="h-20 w-full" />
         <Skeleton className="h-20 w-full" />
@@ -86,14 +86,14 @@ export function WelcomeInstructionLinks() {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
       {randomLinks.map(link => {
         const Icon = link.icon;
         return (
-          <Button variant="outline" className="w-full justify-start text-left h-auto py-3" asChild key={link.code}>
-            <Link href={`/instructions/${link.code}`} className="flex items-center gap-3">
+          <Button variant="outline" className="w-full justify-start text-left h-auto py-3 px-2" asChild key={link.code}>
+            <Link href={`/instructions/${link.code}`} className="flex items-center gap-2">
               {link.emoji ? (
-                <span className="text-2xl flex-shrink-0 w-6 text-center">{link.emoji}</span>
+                <span className="text-xl flex-shrink-0 w-6 text-center">{link.emoji}</span>
               ) : (
                 <Icon className="h-5 w-5 text-primary" />
               )}
