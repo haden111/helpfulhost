@@ -88,20 +88,6 @@ export const instructionsData: Record<string, InstructionLocation> = {
           image: "/LIGHTSON.png",
           dataAiHint: "Lights on",
         },
-        {
-          textSegments: [
-            { content: "Select your desired coffee size (small or large cup icon) and press the button to brew." }
-          ],
-          image: "https://placehold.co/370x550.png",
-          dataAiHint: "brew button",
-        },
-        {
-          textSegments: [
-            { content: "⛔ Do not open the handle during brewing cycle.", color: 'red' }
-          ],
-          image: "https://placehold.co/370x550.png",
-          dataAiHint: "warning sign",
-        }
       ],
     },
     linkIconEmoji: "☕",
@@ -120,5 +106,41 @@ export const instructionsData: Record<string, InstructionLocation> = {
       ],
     },
     linkIconEmoji: "🚿",
+  },
+  "coffee": {
+    defaultTexts: {
+      title: "Coffee Machine",
+      steps: [
+        {
+          textSegments: [
+            { content: "Confusingly, there are currently 2 coffee machinesin the kitchen, please use the Tassimo branded machine next to the oven/stove!", color: 'green' }
+          ],
+          image: "/done-min.png",
+          dataAiHint: "Use the Tassimo machine",
+        },
+        {
+          textSegments: [
+            { content: "Even more confusingly, the coffee pods are over the other side of the kitchen next to the toaster!", color: 'green' }
+          ],
+          image: "/capsules-min.png",
+          dataAiHint: "Coffee pods on other side of kitchen",
+        },
+        {
+          textSegments: [
+            { content: "First, check that there is water in the refill jug at the back of the coffee mahine.", color: 'green' }
+          ],
+          image: "/jug.png",
+          dataAiHint: "Fill with water",
+        },
+        {
+          textSegments: [
+            { content: "Pull up the shiny chrome head to reveal the old capsule, replace with a new capsule in the same direction", color: 'green' }
+          ],
+          image: "/addcapsule-min.png",
+          dataAiHint: "Add the capsule",
+        }
+      ],
+    },
+    linkIconEmoji: "☕️",
   },
 };
