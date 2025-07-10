@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { instructionsData } from '@/lib/instructions-data'; 
+import { instructionsData, type InstructionLocation } from '@/lib/instructions-data'; 
 import { Button } from '@/components/ui/button';
 import { ArrowRightCircle, ListChecks } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,30 +19,46 @@ interface POILink {
 }
 
 export function RandomPOILinks({ currentLocationCode }: RandomPOILinksProps) {
-  const [randomLinks, setRandomLinks] = useState<POILink[]>([]);
+  const [linksToShow, setLinksToShow] = useState<POILink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const allCodes = Object.keys(instructionsData);
-    const availableCodes = allCodes.filter(code => code !== currentLocationCode);
+    const currentLocationData = instructionsData[currentLocationCode];
+    let selectedCodes: string[] = [];
 
-    if (availableCodes.length === 0) {
-      setRandomLinks([]);
+    // Prioritize specified related links
+    if (currentLocationData?.relatedLinks && currentLocationData.relatedLinks.length > 0) {
+      selectedCodes = currentLocationData.relatedLinks.slice(0, 3);
+    } else {
+      // Fallback to random links if none are specified
+      const allCodes = Object.keys(instructionsData);
+      const availableCodes = allCodes.filter(code => code !== currentLocationCode);
+      
+      if (availableCodes.length > 0) {
+        const shuffled = [...availableCodes].sort(() => 0.5 - Math.random());
+        selectedCodes = shuffled.slice(0, Math.min(3, availableCodes.length));
+      }
+    }
+
+    if (selectedCodes.length === 0) {
+      setLinksToShow([]);
       setIsLoading(false);
       return;
     }
 
-    const shuffled = [...availableCodes].sort(() => 0.5 - Math.random());
+    const links = selectedCodes
+      .map(code => {
+        const locationInfo = instructionsData[code];
+        if (!locationInfo) return null; // Skip if code is invalid
+        return {
+          code,
+          title: locationInfo.defaultTexts.title,
+          emoji: locationInfo.linkIconEmoji, 
+        };
+      })
+      .filter((link): link is POILink => link !== null); // Filter out any nulls
     
-    const selectedCodes = shuffled.slice(0, Math.min(3, availableCodes.length));
-
-    const links = selectedCodes.map(code => ({
-      code,
-      title: instructionsData[code].defaultTexts.title,
-      emoji: instructionsData[code].linkIconEmoji, 
-    }));
-    
-    setRandomLinks(links);
+    setLinksToShow(links);
     setIsLoading(false);
   }, [currentLocationCode]);
 
@@ -61,7 +77,7 @@ export function RandomPOILinks({ currentLocationCode }: RandomPOILinksProps) {
     );
   }
 
-  if (randomLinks.length === 0) {
+  if (linksToShow.length === 0) {
     return null; 
   }
 
@@ -80,12 +96,12 @@ export function RandomPOILinks({ currentLocationCode }: RandomPOILinksProps) {
         <ListChecks className="h-6 w-6" />
         Explore Other Instructions
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {randomLinks.map(link => (
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        {linksToShow.map(link => (
           <Button variant="outline" className="w-full justify-start text-left h-auto p-3 shadow-sm hover:shadow-md transition-shadow" asChild key={link.code}>
             <Link href={`/instructions/${link.code}`} className="flex items-center gap-2">
               {link.emoji ? (
-                <span className="text-xl flex-shrink-0 w-6 text-center">{link.emoji}</span>
+                <span className="text-lg flex-shrink-0 w-6 text-center">{link.emoji}</span>
               ) : (
                 <ArrowRightCircle className="h-5 w-5 text-accent flex-shrink-0" />
               )}

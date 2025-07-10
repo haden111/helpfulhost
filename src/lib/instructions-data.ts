@@ -17,6 +17,7 @@ export interface InstructionLocation {
     steps: StepInstruction[];
   };
   linkIconEmoji?: string;
+  relatedLinks?: string[]; // Optional: specify up to 3 location codes to link to
 }
 
 export const instructionsData: Record<string, InstructionLocation> = {
@@ -31,7 +32,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
             { content: "✅ When you return, simply use your key on the top lock to gain entry", color: 'green' },
             { content: "⛔ Do not use the bottom lock at all!", color: 'red' }
           ],
-          image: "/canva_370x550i.png", // Ensure this path is correct
+          image: "/canva_370x550i_min.png", // Ensure this path is correct
           dataAiHint: "keypad door",
         },
         {
@@ -40,12 +41,13 @@ export const instructionsData: Record<string, InstructionLocation> = {
             { content: "⛔ Please never bolt the door or use the safety catch when inside the house", color: 'red' },
             { content: "❗This will mean that the host cannot get into the house!", color: 'black' } // Ensure this is not bold
           ],
-          image: "/CANVALOCKS.gif", // Ensure this path is correct or use placeholder
+          image: "/CANVALOCKS_min.gif", // Ensure this path is correct or use placeholder
           dataAiHint: "door lock",
         },
       ],
     },
     linkIconEmoji: "🔑",
+    relatedLinks: ["back-door", "kitchen", "bathroom"], // Example of specifying links
   },
   "back-door": {
     defaultTexts: {
@@ -56,14 +58,14 @@ export const instructionsData: Record<string, InstructionLocation> = {
             { content: "Turn the knob counter-clockwise until you hear a beep, pull down on the door handle to open the door!", color: 'green' },
             { content: "❗ If you close the door, it will automatically lock itself after a short period,", color: 'red' }
           ],
-          image: "/turningknob.gif",
+          image: "/turningknob_min.gif",
           dataAiHint: "Turn the knob",
         },
         {
           textSegments: [
             { content: "When you come back inside, please close the door and pull the handle upwards and it will lock.", color: 'green' }
           ],
-          image: "/uparrow.gif",
+          image: "/uparrow_min.gif",
           dataAiHint:  "Pull to lock",
         },
       ],
@@ -78,14 +80,14 @@ export const instructionsData: Record<string, InstructionLocation> = {
           textSegments: [
             { content: "Turn on the kitchen lights using the green flashing switch", color: 'green'  }
           ],
-          image: "/kitchenlights.gif",
+          image: "/kitchenlights_min.gif",
           dataAiHint: "kitchen lights",
         },
         {
           textSegments: [
             { content: "You are welcome to use the kitchen to store and make food during your stay. Please help yourself to tea and coffee!", color: 'black'  }
           ],
-          image: "/LIGHTSON.png",
+          image: "/LIGHTSON_min.png",
           dataAiHint: "Lights on",
         },
       ],
@@ -100,7 +102,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
           textSegments: [
             { content: "If using the shower, please switch on the extractor fan and open the window to prevent steam build up", color: 'green' }
           ],
-          image: "/toilet.png",
+          image: "/toilet_min.png",
           dataAiHint: "Extractor Fan",
         }
       ],
@@ -115,7 +117,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
           textSegments: [
             { content: "Confusingly, there are currently 2 coffee machinesin the kitchen, please use the Tassimo branded machine next to the oven/stove!", color: 'green' }
           ],
-          image: "/done-min.png",
+          image: "/done_min.png",
           dataAiHint: "Use the Tassimo machine",
         },
         {
@@ -129,7 +131,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
           textSegments: [
             { content: "First, check that there is water in the refill jug at the back of the coffee mahine.", color: 'green' }
           ],
-          image: "/jug.png",
+          image: "/jug_min.png",
           dataAiHint: "Fill with water",
         },
         {
