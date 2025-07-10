@@ -93,6 +93,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
       ],
     },
     linkIconEmoji: "☕",
+    relatedLinks: ["coffee", "bathroom"], // Example of specifying links
   },
   "bathroom": {
     defaultTexts: {
@@ -144,5 +145,6 @@ export const instructionsData: Record<string, InstructionLocation> = {
       ],
     },
     linkIconEmoji: "☕️",
+    relatedLinks: ["back-door", "kitchen", "bathroom"], // Example of specifying links
   },
 };
