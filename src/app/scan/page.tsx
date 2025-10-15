@@ -7,10 +7,7 @@ import jsQR from 'jsqr';
 import { useToast } from '@/hooks/use-toast';
 import { instructionsData } from '@/lib/instructions-data';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Camera, CameraOff, AlertTriangle, X } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-
+import { X } from 'lucide-react';
 
 export default function ScanPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -152,12 +149,7 @@ export default function ScanPage() {
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       {isScanning && (
-        <>
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-2/3 h-1/2 border-4 border-dashed border-primary/70 rounded-lg" />
-          </div>
-          <div className="scanning-line" />
-        </>
+        <div className="scanning-line" />
       )}
 
       {/* Cancel Button Overlay */}
