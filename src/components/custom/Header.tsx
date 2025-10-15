@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Home } from 'lucide-react';
+import { Home, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LanguageSelector } from '@/components/custom/LanguageSelector';
 
@@ -22,6 +22,11 @@ export function Header() {
         </Link>
         <nav className="flex items-center gap-1 sm:gap-2">
           <LanguageSelector />
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/scan" aria-label="Scan QR Code">
+              <QrCode className="h-5 w-5" />
+            </Link>
+          </Button>
           <Button variant="ghost" size="icon" asChild>
             <Link href="/" aria-label="Home">
               <Home className="h-5 w-5" />

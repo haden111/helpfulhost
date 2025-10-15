@@ -125,7 +125,7 @@ export const instructionsData: Record<string, InstructionLocation> = {
           textSegments: [
             { content: "Even more confusingly, the coffee pods are over the other side of the kitchen next to the toaster!", color: 'green' }
           ],
-          image: "/capsules-min.png",
+          image: "/capsules_min.png",
           dataAiHint: "Coffee pods on other side of kitchen",
         },
         {
@@ -139,8 +139,15 @@ export const instructionsData: Record<string, InstructionLocation> = {
           textSegments: [
             { content: "Pull up the shiny chrome head to reveal the old capsule, replace with a new capsule in the same direction", color: 'green' }
           ],
-          image: "/addcapsule-min.png",
+          image: "/addcapsule_min.png",
           dataAiHint: "Add the capsule",
+        },
+        {
+          textSegments: [
+            { content: "Press the large button on the front of machine", color: 'green' }
+          ],
+          image: "/done_min.png",
+          dataAiHint: "Press button",
         }
       ],
     },
