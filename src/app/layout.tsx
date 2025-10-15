@@ -43,7 +43,7 @@ export default function RootLayout({
         <LanguageProvider initialDetectedLanguage={initialLangForHtml}>
           <div className="flex flex-col min-h-screen">
             <Header />
-            <main className="flex-grow container mx-auto p-4 sm:p-6 md:p-8">
+            <main className="flex-grow container mx-auto p-4 sm:p-6 md:p-8 relative">
               {children}
             </main>
             <footer className="py-6 text-center text-sm text-muted-foreground border-t">
