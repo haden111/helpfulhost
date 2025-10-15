@@ -8,8 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { instructionsData } from '@/lib/instructions-data';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Camera, CameraOff, AlertTriangle, QrCode } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Camera, CameraOff, AlertTriangle, QrCode, Home } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 
 
 export default function ScanPage() {
@@ -186,6 +186,12 @@ export default function ScanPage() {
                     </Alert>
                 )}
             </CardContent>
+            <CardFooter className="flex justify-center">
+              <Button variant="outline" onClick={() => router.push('/')}>
+                  <Home className="mr-2 h-4 w-4" />
+                  Cancel and Go Home
+              </Button>
+            </CardFooter>
         </Card>
       </div>
     </div>
