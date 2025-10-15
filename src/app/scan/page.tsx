@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { instructionsData } from '@/lib/instructions-data';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Camera, CameraOff, AlertTriangle, QrCode, Home } from 'lucide-react';
+import { Camera, CameraOff, AlertTriangle, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 
 
@@ -44,7 +44,8 @@ export default function ScanPage() {
       toast({
         variant: 'destructive',
         title: 'Camera Access Denied',
-        description: error.message || 'Please enable camera permissions in your browser settings.',
+        description: 'Please enable camera permissions in your browser settings to scan QR codes.',
+        duration: 9000,
       });
     }
   };
@@ -90,14 +91,16 @@ export default function ScanPage() {
                 });
                 router.push(`/instructions/${locationCode}`);
               } else {
+                // Temporarily pause scanning and show a toast
+                setIsScanning(false); 
                 toast({
                   variant: 'destructive',
                   title: 'Invalid QR Code',
                   description: 'This QR code is not associated with any instructions.',
+                  duration: 3000,
                 });
-                // Optional: add a small delay before scanning again
-                setTimeout(() => setIsScanning(true), 2000);
-                setIsScanning(false);
+                // Resume scanning after a delay
+                setTimeout(() => setIsScanning(true), 3000);
               }
             }
           }
@@ -119,8 +122,26 @@ export default function ScanPage() {
     };
   }, [isScanning, router, toast]);
 
+  // Use useEffect to show toasts for permission status changes, as UI elements are removed.
+  useEffect(() => {
+    if (hasCameraPermission === false) {
+      toast({
+        variant: 'destructive',
+        title: 'Camera Access Required',
+        description: 'Please grant permission in your browser to continue. You can try again by reloading the page.',
+        duration: 9000,
+      });
+    } else if (hasCameraPermission === null) {
+      toast({
+        title: 'Requesting Camera...',
+        description: 'Please allow camera access in your browser prompt.',
+        duration: 5000,
+      });
+    }
+  }, [hasCameraPermission, toast]);
+
   return (
-    <div className="fixed inset-0 z-0">
+    <div className="fixed inset-0 z-0 bg-black">
       <video
         ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover"
@@ -139,61 +160,18 @@ export default function ScanPage() {
         </>
       )}
 
-      {/* Overlay for content */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-sm sm:p-6 md:p-8">
-        <Card className="w-full max-w-2xl mx-auto bg-card/80">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                    <QrCode className="h-6 w-6" />
-                    Scan QR Code
-                </CardTitle>
-                <CardDescription>
-                    Point your camera at a QR code to jump directly to its instructions.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {hasCameraPermission === false && (
-                    <Alert variant="destructive" className="mt-4">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>Camera Access Required</AlertTitle>
-                    <AlertDescription>
-                        <p>This feature requires camera access. Please grant permission to continue.</p>
-                        <Button onClick={getCameraPermission} className="mt-2" size="sm">
-                        <Camera className="mr-2 h-4 w-4" />
-                        Try Again
-                        </Button>
-                    </AlertDescription>
-                    </Alert>
-                )}
-
-                {hasCameraPermission === null && (
-                    <Alert className="mt-4">
-                    <Camera className="h-4 w-4" />
-                    <AlertTitle>Requesting Camera...</AlertTitle>
-                    <AlertDescription>
-                        Please allow camera access in your browser prompt.
-                    </AlertDescription>
-                    </Alert>
-                )}
-
-                {hasCameraPermission && !isScanning && (
-                    <Alert className="mt-4">
-                    <CameraOff className="h-4 w-4" />
-                    <AlertTitle>Scanner Paused</AlertTitle>
-                    <AlertDescription>
-                        The scanner is currently paused.
-                    </AlertDescription>
-                    </Alert>
-                )}
-            </CardContent>
-            <CardFooter className="flex justify-center">
-              <Button variant="outline" onClick={() => router.push('/')}>
-                  <Home className="mr-2 h-4 w-4" />
-                  Cancel and Go Home
-              </Button>
-            </CardFooter>
-        </Card>
+      {/* Cancel Button Overlay */}
+      <div className="absolute top-4 right-4 z-50">
+        <Button
+          variant="ghost"
+          onClick={() => router.push('/')}
+          className="text-white bg-black/50 hover:bg-black/75 hover:text-white px-3 py-2 h-auto"
+        >
+          <X className="h-5 w-5 mr-2" />
+          CANCEL
+        </Button>
       </div>
+
     </div>
   );
 }
