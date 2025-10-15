@@ -126,7 +126,7 @@ export default function ScanPage() {
 
   return (
     <div className="py-8 flex justify-center">
-      <Card className="w-full max-w-lg shadow-xl">
+      <Card className="w-full max-w-2xl shadow-xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl">
             <QrCode className="h-6 w-6" />
@@ -148,9 +148,12 @@ export default function ScanPage() {
             <canvas ref={canvasRef} style={{ display: 'none' }} />
             
             {isScanning && (
+              <>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-2/3 h-2/3 border-4 border-dashed border-primary/70 rounded-lg animate-pulse" />
+                    <div className="w-2/3 h-2/3 border-4 border-dashed border-primary/70 rounded-lg" />
                 </div>
+                <div className="scanning-line" />
+              </>
             )}
           </div>
           
