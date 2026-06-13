@@ -1,11 +1,16 @@
+'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
 import { Home, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LanguageSelector } from '@/components/custom/LanguageSelector';
+import { usePathname } from 'next/navigation';
 
 export function Header() {
+  const pathname = usePathname();
+  const isScanPage = pathname === '/scan';
+
   return (
     <header className="bg-card border-b border-border shadow-sm sticky top-0 z-40">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -23,7 +28,7 @@ export function Header() {
         <nav className="flex items-center gap-1 sm:gap-2">
           <LanguageSelector />
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/scan" aria-label="Scan QR Code">
+            <Link href={isScanPage ? "/" : "/scan"} aria-label={isScanPage ? "Close Scanner" : "Scan QR Code"}>
               <QrCode className="h-5 w-5" />
             </Link>
           </Button>
