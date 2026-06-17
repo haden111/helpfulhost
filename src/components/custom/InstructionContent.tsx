@@ -221,14 +221,14 @@ export function InstructionContent({ locationData }: InstructionContentProps) {
                 </div>
               </div>
             ))}
-            {currentSteps.length === 0 && !fetchError && !isLoading && locationData?.defaultTexts?.steps?.length > 0 && (
+            {currentSteps.length === 0 && !fetchError && !isLoading && (locationData?.defaultTexts?.steps?.length ?? 0) > 0 && (
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertTitle>Instructions Ready</AlertTitle>
                 <AlertDescription>Text will appear here shortly.</AlertDescription>
               </Alert>
             )}
-            {currentSteps.length === 0 && locationData?.defaultTexts?.steps?.length === 0 && !isLoading && (
+            {currentSteps.length === 0 && (locationData?.defaultTexts?.steps?.length ?? 0) === 0 && !isLoading && (
               <Alert variant="default">
                 <Info className="h-4 w-4" />
                 <AlertTitle>No Instructions</AlertTitle>

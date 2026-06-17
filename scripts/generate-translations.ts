@@ -27,7 +27,6 @@ const FOOTER_DEFAULT_TEXTS = {
 
 async function generateTranslations() {
   console.log("Starting translation generation process...");
-  ai.noop(); // A simple call to ensure AI toolkit is warm if needed, or just to acknowledge its import.
 
   const defaultLocale = 'en';
   const localesDir = path.join(process.cwd(), 'public', 'locales');
@@ -61,19 +60,17 @@ async function generateTranslations() {
   await fs.writeJson(enFilePath, allDefaultTexts, { spaces: 2 });
   console.log(`Generated English translations: ${enFilePath}`);
 
-  const translationPromises = [];
-
   for (const lang of supportedLanguages) {
     if (lang.code === defaultLocale) continue; // Skip English
 
     console.log(`Preparing translation for ${lang.name} (${lang.code})...`);
     
-    // Create a promise for each language translation
-    const translationPromise = translateInstructionalText({
-      textsToTranslate: { ...allDefaultTexts }, // Send a copy
-      language: lang.code,
-    })
-    .then(async (result) => {
+    try {
+      const result = await translateInstructionalText({
+        textsToTranslate: { ...allDefaultTexts }, // Send a copy
+        language: lang.code,
+      });
+
       if (result && result.translatedTexts) {
         // Check if any translated text is identical to the original English text
         let fallbackOccurred = false;
@@ -97,22 +94,18 @@ async function generateTranslations() {
         await fs.writeJson(langFilePath, allDefaultTexts, { spaces: 2 });
         console.warn(`WARNING: Wrote English fallbacks to ${lang.code}.json due to missing translation result.`);
       }
-    })
-    .catch(async (error) => {
+    } catch (error: any) {
       console.error(`ERROR: Translating to ${lang.name} (${lang.code}) failed:`, error.message || error);
       // Write English fallbacks if an error occurs
       const langFilePath = path.join(localesDir, `${lang.code}.json`);
       await fs.writeJson(langFilePath, allDefaultTexts, { spaces: 2 });
       console.warn(`ERROR: Wrote English fallbacks to ${lang.code}.json due to error during translation.`);
-    });
-    
-    translationPromises.push(translationPromise);
-    
-  }
+    }
 
-  // Wait for all translation promises to settle
-  console.log(`Waiting for ${translationPromises.length} language translations to complete...`);
-  await Promise.allSettled(translationPromises);
+    // Add a delay of 4.5 seconds between translations to avoid rate limits (max 15 requests per minute)
+    console.log(`Waiting 4.5 seconds to respect rate limits...`);
+    await new Promise(resolve => setTimeout(resolve, 4500));
+  }
 
   console.log('Translation generation process complete.');
   console.log('Please review any warnings or errors above.');

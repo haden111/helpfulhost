@@ -54,7 +54,7 @@ export function RandomPOILinks({ currentLocationCode }: RandomPOILinksProps) {
           code,
           title: locationInfo.defaultTexts.title,
           emoji: locationInfo.linkIconEmoji, 
-        };
+        } as POILink;
       })
       .filter((link): link is POILink => link !== null); // Filter out any nulls
     

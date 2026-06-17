@@ -11,7 +11,7 @@ export default function WelcomePage() {
         <CardHeader className="text-center bg-primary/20 p-8">
           <div className="mx-auto mb-6 flex justify-center">
             <Image
-              src="/haden.png"
+              src="/haden_min.png"
               alt="Haden's Airbnb Logo"
               width={434}
               height={327}

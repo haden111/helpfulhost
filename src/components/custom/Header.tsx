@@ -16,7 +16,7 @@ export function Header() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-lg sm:text-xl font-semibold text-primary hover:text-primary/80 transition-colors">
           <Image
-            src="/haden.png" 
+            src="/haden_min.png" 
             alt="Haden's Airbnb Logo"
             width={434} 
             height={327} 
